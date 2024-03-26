@@ -5,5 +5,4 @@ class Strategy:
         self.id = id
         self.name = name
         self.desc = desc
-        self.modified = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     
