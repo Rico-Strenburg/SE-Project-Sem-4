@@ -23,18 +23,15 @@ def delete_strategy(strategy_id):
     st.write(strategy_id)
     strategies = [strat for strat in strategies if strat.id != strategy_id]
 
-
-
-
 def display_edit_page(strategy):
     new_name = st.text_input('New Name:', strategy.name)
     new_desc = st.text_area('New Description:', strategy.desc)
     strategy.name = new_name
     strategy.desc = new_desc
 
-def display_strategy_page():
-    st.title('Screener Page')
-    st.write('Your Screener : ')
+def display_strategy_page(conn):
+    st.title('Strategy Page')
+    st.write('Your Strategies : ')
 
     for strategy in strategies:
         with st.expander(strategy.name):

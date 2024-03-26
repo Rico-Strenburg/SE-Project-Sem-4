@@ -1,6 +1,6 @@
 import streamlit as st
 
-def display_home_page():
+def display_home_page(conn):
     st.title('Home Page')
     
     st.subheader('User Information')
