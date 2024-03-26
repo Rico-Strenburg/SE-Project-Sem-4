@@ -13,3 +13,4 @@ def display_home_page():
     st.write(f'Name: {name}')
     st.write(f'Age: {age}')
     st.write(f'Gender: {gender}')
+    

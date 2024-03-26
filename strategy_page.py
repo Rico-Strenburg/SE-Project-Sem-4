@@ -33,8 +33,8 @@ def display_edit_page(strategy):
     strategy.desc = new_desc
 
 def display_strategy_page():
-    st.title('Strategy Page')
-    st.write('Your Strategies : ')
+    st.title('Screener Page')
+    st.write('Your Screener : ')
 
     for strategy in strategies:
         with st.expander(strategy.name):
