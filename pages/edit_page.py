@@ -2,15 +2,33 @@ import streamlit as st
 from src.utilities.manager import *
 from src.model.Strategy import Strategy
 
+ratio_options = ['<select>', 'Open Price', 'High Price', 'Low Price', 'Close Price']
+operator_options = ['>', '<', '>=', '<=', '=']
+
 def basic_ratio_rule(ratio:Ratio):
-    basic1, basic2, basic3 = st.columns(3)
+    basic1, basic2, basic3, basic4, basic5 = st.columns([3,3,3,1,1])
     with basic1:
-        name = st.selectbox('Select the setup',['ratio name...', 'Other'], key=f"name_{ratio.ratio_id}")
+        ratio.ratio = st.selectbox('Select the setup',ratio_options,index=ratio_options.index(ratio.ratio), key=f"name_{ratio.ratio_id}")
     with basic2:
-        operator = st.selectbox('Select the setup',['>', '<', '>=', '<=', '='], key=f"operator_{ratio.ratio_id}" )
+        ratio.operator = st.selectbox('Select the setup',operator_options, index=operator_options.index(ratio.operator), key=f"operator_{ratio.ratio_id}" )
     with basic3:
-        decimals = st.number_input("decimals", key=f"decimal_{ratio.ratio_id}")
-    must_watch = st.checkbox("Must watch", key=f"watch_{ratio.ratio_id}")
+        ratio.value = st.number_input("decimals",value=ratio.value,  key=f"decimal_{ratio.ratio_id}")
+    with basic4:
+        # st.write("#")  # Placeholder for alignment
+        st.write('<div style="height: 30px;"></div>', unsafe_allow_html=True)
+        delete_button = st.button('\u2717', key=f"delete_{ratio.ratio_id}")
+        if delete_button:
+            delete_ratio(ratio.ratio_id)
+            st.rerun()
+    with basic5:
+        st.write('<div style="height: 30px;"></div>', unsafe_allow_html=True)
+        save_button = st.button('\u2713', key=f"save_{ratio.ratio_id}")
+        if save_button:
+            update_ratio(ratio)
+    # with expander_col:
+    #     st.write('<div style="height: 25px;"></div>', unsafe_allow_html=True)
+    #     with st.expander("Options", expanded=False):
+    #         must_watch = st.checkbox("Must watch", key=f"watch_{ratio.ratio_id}")
 
 def ratio_vs_ratio_rule():
     st.header("Ratio Vs Ratio")
@@ -63,7 +81,6 @@ if strategy:
         insert_ratio(strategy.id)
         st.rerun()
     st.header("Ratio vs Ratio")
-    
 else:
     st.write("Strategy Is Not Found")
 

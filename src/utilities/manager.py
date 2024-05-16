@@ -63,7 +63,7 @@ def get_strategies(id=None):
     
     return strategies
 
-def insert_ratio(strategy_id, ratio="default", operator="-", value=0, must_match=0):
+def insert_ratio(strategy_id, ratio="<select>", operator="=", value=0, must_match=0):
     data = (strategy_id, ratio, operator, value, must_match)
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
@@ -91,6 +91,27 @@ def get_ratio(strategy_id):
         ratios.append(ratio)
     
     return ratios
+
+def delete_ratio(ratio_id):
+    with sqlite3.connect('novesieve_dev.db') as conn:
+        c = conn.cursor()
+        c.execute(f"DELETE FROM ratio_attributes WHERE ratioId = {ratio_id}")
+        conn.commit()
+
+def update_ratio(ratio:Ratio):
+    with sqlite3.connect('novesieve_dev.db') as conn:
+        c = conn.cursor()
+        c.execute("""
+                  UPDATE
+                  ratio_attributes
+                  SET
+                  ratio_name = ?,
+                  operator = ?,
+                  value = ?,
+                  must_match = ?
+                  WHERE ratioId = ?
+                  """, (ratio.ratio, ratio.operator, ratio.value, ratio.must_match, ratio.ratio_id))
+        conn.commit()
 
 # # Read Data
 # c.execute("SELECT * FROM users")
