@@ -1,7 +1,7 @@
 import streamlit as st
 import sqlite3
 from src.utilities.manager import init_db
-# from pages.home_page import display_home_page
+from pages.home_page import display_home_page
 from pages.strategy_page import display_strategy_page
 # from views.screener_page import display_screener_page
 # from views.backtests_page import display_backtest_page
@@ -23,8 +23,7 @@ def main():
     
     # Display the selected page
     if page == 'Home':
-        # display_home_page()
-        display_strategy_page() 
+        display_home_page()
     elif page == 'Strategy':
         display_strategy_page()
     
