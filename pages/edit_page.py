@@ -6,7 +6,7 @@ ratio_options = ['<select>', 'Open Price', 'High Price', 'Low Price', 'Close Pri
 operator_options = ['>', '<', '>=', '<=', '=']
 
 def basic_ratio_rule(ratio:Ratio):
-    basic1, basic2, basic3, basic4, basic5 = st.columns([3,3,3,1,1])
+    basic1, basic2, basic3, basic4, basic5, basic6 = st.columns([3,3,3,1,1,1])
     with basic1:
         ratio.ratio = st.selectbox('Select the setup',ratio_options,index=ratio_options.index(ratio.ratio), key=f"name_{ratio.ratio_id}")
     with basic2:
@@ -14,13 +14,17 @@ def basic_ratio_rule(ratio:Ratio):
     with basic3:
         ratio.value = st.number_input("decimals",value=ratio.value,  key=f"decimal_{ratio.ratio_id}")
     with basic4:
-        # st.write("#")  # Placeholder for alignment
+        st.write('<div style="height: 30px;"></div>', unsafe_allow_html=True)
+        with st.popover("\u22ee"):
+            st.markdown("Additional Settings")
+            ratio.must_match = st.checkbox("Must Match",value=ratio.must_match, key=f"watch_{ratio.ratio_id}")
+    with basic5:
         st.write('<div style="height: 30px;"></div>', unsafe_allow_html=True)
         delete_button = st.button('\u2717', key=f"delete_{ratio.ratio_id}")
         if delete_button:
             delete_ratio(ratio.ratio_id)
             st.rerun()
-    with basic5:
+    with basic6:
         st.write('<div style="height: 30px;"></div>', unsafe_allow_html=True)
         save_button = st.button('\u2713', key=f"save_{ratio.ratio_id}")
         if save_button:
