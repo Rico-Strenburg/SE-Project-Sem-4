@@ -2,13 +2,13 @@ import streamlit as st
 from src.utilities.manager import *
 from src.model.Strategy import Strategy
 
-ratio_options = ['<select>', 'Open Price', 'High Price', 'Low Price', 'Close Price']
+basic_ratio_options = ['<select>', 'Open Price', 'High Price', 'Low Price', 'Close Price']
 operator_options = ['>', '<', '>=', '<=', '=']
 
 def basic_ratio_rule(ratio:Ratio):
     basic1, basic2, basic3, basic4, basic5, basic6 = st.columns([3,3,3,1,1,1])
     with basic1:
-        ratio.ratio = st.selectbox('Select the setup',ratio_options,index=ratio_options.index(ratio.ratio), key=f"name_{ratio.ratio_id}")
+        ratio.ratio = st.selectbox('Select the setup',basic_ratio_options,index=basic_ratio_options.index(ratio.ratio), key=f"name_{ratio.ratio_id}")
     with basic2:
         ratio.operator = st.selectbox('Select the setup',operator_options, index=operator_options.index(ratio.operator), key=f"operator_{ratio.ratio_id}" )
     with basic3:
@@ -29,10 +29,6 @@ def basic_ratio_rule(ratio:Ratio):
         save_button = st.button('\u2713', key=f"save_{ratio.ratio_id}")
         if save_button:
             update_ratio(ratio)
-    # with expander_col:
-    #     st.write('<div style="height: 25px;"></div>', unsafe_allow_html=True)
-    #     with st.expander("Options", expanded=False):
-    #         must_watch = st.checkbox("Must watch", key=f"watch_{ratio.ratio_id}")
 
 def ratio_vs_ratio_rule():
     st.header("Ratio Vs Ratio")
@@ -54,13 +50,7 @@ if 'current_id' not in st.session_state:
         st.session_state['current_id'] = '-1'
 strategy = get_strategies(id=st.session_state['current_id'])
 
-# with st.popover("Add Rules Pattern"):
-#             basic_ratio_button = st.button("Basic Ratio", key="basic-ratio")
-#             ratio_vs_ratio_button = st.button("Ratio vs Ratio", key="ratio-vs-ratio")
-#             if basic_ratio_button:
-#                 basic_ratio_rule() # basic ratio rule
-#             if ratio_vs_ratio_button:
-#                 ratio_vs_ratio_rule() # ratio vs ratio rule
+
                 
                 
 if strategy:
@@ -77,14 +67,20 @@ if strategy:
     #         insert_ratio(strategy.id)
     name = st.text_input('Name:', strategy.name)
     desc = st.text_area('Description:', strategy.desc)
-    st.header("Basic Ratio")
+    st.header("Fundamental Rule")
     for ratio in ratios:
         basic_ratio_rule(ratio)
-    # submit = st.form_submit_button("Submit")
-    if st.button('Add Ratio'):
-        insert_ratio(strategy.id)
-        st.rerun()
-    st.header("Ratio vs Ratio")
+        
+    with st.popover("Add Rules Pattern"):
+        basic_ratio_button = st.button("Basic Ratio", key="basic-ratio")
+        ratio_vs_ratio_button = st.button("Ratio vs Ratio", key="ratio-vs-ratio")
+        if basic_ratio_button:
+            insert_ratio(strategy.id)
+            st.rerun()
+        if ratio_vs_ratio_button:
+            #Insert ratio vs ratio
+            pass
+    st.header("Technical Rule")
 else:
     st.write("Strategy Is Not Found")
 

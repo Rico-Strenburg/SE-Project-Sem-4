@@ -18,6 +18,7 @@ def init_db():
                           ratioId INTEGER PRIMARY KEY,
                           strategyId INTEGER,
                           ratio_name TEXT,
+                          ratio_name2 TEXT,
                           operator TEXT,
                           value INTEGER,
                           MUST_MATCH INTEGER
@@ -87,7 +88,7 @@ def get_ratio(strategy_id):
     ratios = []
 
     for row in data:
-        ratio = Ratio(row[0], row[1], row[2], row[3], row[4], row[5])
+        ratio = Ratio(row[0], row[1], row[2], row[3], row[4], row[5], row[6])
         ratios.append(ratio)
     
     return ratios
