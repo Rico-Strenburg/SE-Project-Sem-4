@@ -19,6 +19,7 @@ def init_db():
                           strategyId INTEGER,
                           ratio_name TEXT,
                           ratio_name2 TEXT,
+                          type TEXT,
                           operator TEXT,
                           value INTEGER,
                           MUST_MATCH INTEGER
@@ -64,16 +65,16 @@ def get_strategies(id=None):
     
     return strategies
 
-def insert_ratio(strategy_id, ratio="<select>", operator="=", value=0, must_match=0):
-    data = (strategy_id, ratio, operator, value, must_match)
+def insert_ratio(strategy_id, type, ratio="<select>",ratio2="<select>", operator="=", value=0, must_match=0):
+    data = (strategy_id, ratio, ratio2, type, operator, value, must_match)
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
         c.execute("""
                   INSERT INTO 
                   ratio_attributes
-                  (strategyId, ratio_name, operator, value, must_match)
+                  (strategyId, ratio_name, ratio_name2, type, operator, value, must_match)
                   VALUES
-                  (?, ?, ?, ? ,?)
+                  (?, ?, ?, ? ,?, ?, ?)
                   """
                   , data)
         conn.commit()
@@ -88,7 +89,7 @@ def get_ratio(strategy_id):
     ratios = []
 
     for row in data:
-        ratio = Ratio(row[0], row[1], row[2], row[3], row[4], row[5], row[6])
+        ratio = Ratio(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7])
         ratios.append(ratio)
     
     return ratios
@@ -107,11 +108,12 @@ def update_ratio(ratio:Ratio):
                   ratio_attributes
                   SET
                   ratio_name = ?,
+                  ratio_name2 = ?,
                   operator = ?,
                   value = ?,
                   must_match = ?
                   WHERE ratioId = ?
-                  """, (ratio.ratio, ratio.operator, ratio.value, ratio.must_match, ratio.ratio_id))
+                  """, (ratio.ratio, ratio.ratio2, ratio.operator, ratio.value, ratio.must_match, ratio.ratio_id))
         conn.commit()
 
 # # Read Data
