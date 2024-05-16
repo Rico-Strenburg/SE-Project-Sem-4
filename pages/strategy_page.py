@@ -37,3 +37,5 @@ def display_strategy_page():
     if st.button('Add Strategy'):
         add_default_strategy()
 
+if __name__ == '__main__':
+    display_strategy_page()

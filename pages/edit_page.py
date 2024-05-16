@@ -1,6 +1,7 @@
 import streamlit as st
 from src.utilities.manager import *
 from src.model.Strategy import Strategy
+from typing import List
 
 basic_ratio_options = ['<select>', 'Open Price', 'High Price', 'Low Price', 'Close Price']
 operator_options = ['>', '<', '>=', '<=', '=']
@@ -46,40 +47,36 @@ def ratio_vs_ratio_rule():
 st.write(st.session_state)
 st.title("Edit page")
 
+#Check if Id is valid and check if strategy exists
 if 'current_id' not in st.session_state:
-        st.session_state['current_id'] = '-1'
+    st.session_state['current_id'] = '-1'
 strategy = get_strategies(id=st.session_state['current_id'])
-
-
-                
                 
 if strategy:
+    #Get Strategy and Fundamental Ratios
     strategy = Strategy(*strategy)
-    ratios = get_ratio(strategy.id)
-    # with st.form("edit_strategy"):
-    #     st.write("Rate my satisfaction")
-    #     name = st.text_input('New Name:', strategy.name)
-    #     desc = st.text_area('New Description:', strategy.desc)
-    #     for ratio in ratios:
-    #         basic_ratio_rule()
-    #     submit = st.form_submit_button("Submit")
-    #     if st.button('Add Ratio'):
-    #         insert_ratio(strategy.id)
+    fund_ratios:List[Ratio] = get_ratio(strategy.id)
+    
     name = st.text_input('Name:', strategy.name)
     desc = st.text_area('Description:', strategy.desc)
+    
+    #Display All Fundamental Rule
     st.header("Fundamental Rule")
-    for ratio in ratios:
-        basic_ratio_rule(ratio)
+    for ratio in fund_ratios:
+        if (ratio.type == 'basic'):
+            basic_ratio_rule(ratio)
+        if (ratio.type == 'versus'):
+            pass
         
     with st.popover("Add Rules Pattern"):
         basic_ratio_button = st.button("Basic Ratio", key="basic-ratio")
         ratio_vs_ratio_button = st.button("Ratio vs Ratio", key="ratio-vs-ratio")
         if basic_ratio_button:
-            insert_ratio(strategy.id)
+            insert_ratio(strategy.id, 'basic')
             st.rerun()
         if ratio_vs_ratio_button:
-            #Insert ratio vs ratio
-            pass
+            insert_ratio(strategy.id, 'versus')
+            st.rerun()
     st.header("Technical Rule")
 else:
     st.write("Strategy Is Not Found")
