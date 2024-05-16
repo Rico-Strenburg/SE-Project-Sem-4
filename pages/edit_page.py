@@ -32,7 +32,6 @@ def basic_ratio_rule(ratio:Ratio):
             update_ratio(ratio)
 
 def ratio_vs_ratio_rule(ratio:Ratio):
-    st.header("Ratio Vs Ratio")
     basic7, basic8, basic9, basic10, basic11, basic12, basic13, basic14 = st.columns([3,3,3,0.7,3,1.2,1,1])
     with basic7:
         ratio.ratio = st.selectbox('',basic_ratio_options,index=basic_ratio_options.index(ratio.ratio), key=f"name1_{ratio.ratio_id}")
@@ -86,7 +85,7 @@ if strategy:
         if (ratio.type == 'basic'):
             basic_ratio_rule(ratio)
         if (ratio.type == 'versus'):
-            pass
+            ratio_vs_ratio_rule(ratio)
         
     with st.popover("Add Rules Pattern"):
         basic_ratio_button = st.button("Basic Ratio", key="basic-ratio")
@@ -100,7 +99,7 @@ if strategy:
     st.header("Technical Rule")
 else:
     st.write("Strategy Is Not Found")
-ratio_vs_ratio_rule(Ratio(100,200,"Open Price","High Price", ">", 10, False))
+# ratio_vs_ratio_rule(Ratio(100,200,"Open Price","High Price", ">", 10, False))
 
     
     
