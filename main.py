@@ -3,7 +3,7 @@ import sqlite3
 from src.utilities.manager import init_db
 from pages.home_page import display_home_page
 from pages.strategy_page import display_strategy_page
-# from views.screener_page import display_screener_page
+from pages.screener_page import display_screener_page
 # from views.backtests_page import display_backtest_page
 # from pages.edit_page import display_edit_page
 
@@ -37,6 +37,8 @@ def main():
         display_home_page()
     elif page == 'Strategy':
         display_strategy_page()
+    elif page =='Screener':
+        display_screener_page()
     
 if __name__ == '__main__':
     main()
