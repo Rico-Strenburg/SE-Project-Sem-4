@@ -1,5 +1,6 @@
 import sqlite3
 from ..model.Strategy import Strategy
+from ..model.Screener import Screener
 from ..model.Ratio import Ratio
 
 # Execute a SQL command to create a table
@@ -27,27 +28,72 @@ def init_db():
             ''')
             conn.commit()
 
-def update_strategy(name, desc, id):
+# def update_strategy(name, desc, id):
+#     return
+#     with sqlite3.connect('novesieve_dev.db') as conn:
+#         c = conn.cursor()
+#         c.execute("UPDATE strategies SET name = ?, description = ? WHERE strategyId = ?", (name, desc, id))
+#         conn.commit()
+
+# def insert_new_strategy():
+#     default_data = ("default_strategy", "This is desc")
+#     with sqlite3.connect('novesieve_dev.db') as conn:
+#         c = conn.cursor()
+#         c.execute("INSERT INTO strategies (name, description) VALUES (?, ?)", default_data)
+#         conn.commit()
+    
+# def delete_strategy(strategy_id):
+#     with sqlite3.connect('novesieve_dev.db') as conn:
+#         c = conn.cursor()
+#         c.execute(f"DELETE FROM strategies WHERE strategyId = {strategy_id}")
+#         conn.commit()
+
+# def get_strategies(id=None):
+#     with sqlite3.connect('novesieve_dev.db') as conn:
+#         c = conn.cursor()
+#         if id:
+#             c.execute(f"Select * from strategies WHERE strategyId = {id}")
+#             data = c.fetchone()
+#             return data
+#         c.execute(f"SELECT * FROM strategies")
+#         data = c.fetchall()
+    
+#     strategies = []
+
+#     for row in data:
+#         strategy = Strategy(row[0], row[1], row[2])
+#         strategies.append(strategy)
+    
+#     return strategies
+
+def update_screener(name, desc, id):
     return
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
         c.execute("UPDATE strategies SET name = ?, description = ? WHERE strategyId = ?", (name, desc, id))
         conn.commit()
 
-def insert_new_strategy():
+def insert_screener():
+    default_data = ("default_strategy", "This is desc")
+    with sqlite3.connect('novesieve_dev.db') as conn:
+        c = conn.cursor()
+        c.execute("INSERT INTO strategies (name, description) VALUES (?, ?)", default_data)
+        conn.commit()
+
+def insert_new_screener():
     default_data = ("default_strategy", "This is desc")
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
         c.execute("INSERT INTO strategies (name, description) VALUES (?, ?)", default_data)
         conn.commit()
     
-def delete_strategy(strategy_id):
+def delete_screener(strategy_id):
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
         c.execute(f"DELETE FROM strategies WHERE strategyId = {strategy_id}")
         conn.commit()
 
-def get_strategies(id=None):
+def get_screener(id=None):
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
         if id:
@@ -60,7 +106,7 @@ def get_strategies(id=None):
     strategies = []
 
     for row in data:
-        strategy = Strategy(row[0], row[1], row[2])
+        strategy = Screener(row[0], row[1], row[2])
         strategies.append(strategy)
     
     return strategies
