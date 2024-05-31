@@ -1,6 +1,6 @@
 import streamlit as st
 from src.utilities.manager import delete_strategy, insert_new_strategy, get_strategies, update_strategy
-from src.model.Strategy import Strategy
+# from src.model.Strategy import Strategy
 
 def add_default_strategy():
     insert_new_strategy()
