@@ -21,9 +21,17 @@ def init_db():
                           ratio_name TEXT,
                           ratio_name2 TEXT,
                           type TEXT,
+                          category TEXT,
                           operator TEXT,
                           value INTEGER,
                           MUST_MATCH INTEGER
+                    )
+            ''')
+            c.execute('''
+                      CREATE TABLE IF NOT EXISTS pattern_rules(
+                          patternId INTEGER PRIMARY KEY,
+                          screenerId INTEGER
+                          name TEXT,
                     )
             ''')
             conn.commit()
@@ -111,31 +119,74 @@ def get_screener(id=None):
     
     return strategies
 
-def insert_ratio(strategy_id, type, ratio="<select>",ratio2="<select>", operator="=", value=0, must_match=0):
-    data = (strategy_id, ratio, ratio2, type, operator, value, must_match)
+def insert_pattern(pattern_id, screener_id, name):
+    data = (pattern_id, screener_id, name)
+    with sqlite3.connect('novesieve_dev.db') as conn:
+        c = conn.cursor()
+        c.execute("""
+                  INSERT INTO
+                  pattern_rules
+                  (patternId, screenerId, name)
+                  VALUES
+                  (?, ?, ?)
+                  """, data)
+        conn.commit()
+
+def get_pattern(screener_id):
+    # with sqlite3.connect('novesieve_dev.db') as conn:
+    #     c = conn.cursor()
+    #     if id:
+    #         c.execute(f"SELECT * FROM ratio_attributes WHERE strategyId = {strategy_id} AND category = 'fundamental'")
+    #         data = c.fetchall()
+    
+    # ratios = []
+
+    # for row in data:
+    #     ratio = Ratio(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8])
+    #     ratios.append(ratio)
+    
+    # return ratios
+
+def insert_ratio(strategy_id, type, category, ratio="<select>",ratio2="<select>", operator="=", value=0, must_match=0):
+    data = (strategy_id, ratio, ratio2, type, category, operator, value, must_match)
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
         c.execute("""
                   INSERT INTO 
                   ratio_attributes
-                  (strategyId, ratio_name, ratio_name2, type, operator, value, must_match)
+                  (strategyId, ratio_name, ratio_name2, type, category, operator, value, must_match)
                   VALUES
-                  (?, ?, ?, ? ,?, ?, ?)
+                  (?, ?, ?, ? ,?, ?, ?, ?)
                   """
                   , data)
         conn.commit()
 
-def get_ratio(strategy_id):
+def get_fundamental(strategy_id):
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
         if id:
-            c.execute(f"SELECT * from ratio_attributes WHERE strategyId = {strategy_id}")
+            c.execute(f"SELECT * FROM ratio_attributes WHERE strategyId = {strategy_id} AND category = 'fundamental'")
             data = c.fetchall()
     
     ratios = []
 
     for row in data:
-        ratio = Ratio(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7])
+        ratio = Ratio(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8])
+        ratios.append(ratio)
+    
+    return ratios
+
+def get_technical(strategy_id):
+    with sqlite3.connect('novesieve_dev.db') as conn:
+        c = conn.cursor()
+        if id:
+            c.execute(f"SELECT * FROM ratio_attributes WHERE strategyId = {strategy_id} AND category = 'technical'")
+            data = c.fetchall()
+    
+    ratios = []
+
+    for row in data:
+        ratio = Ratio(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8])
         ratios.append(ratio)
     
     return ratios

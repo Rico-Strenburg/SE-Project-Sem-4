@@ -1,18 +1,17 @@
 import streamlit as st
-from src.utilities.manager import delete_screener, insert_screener, get_screener, update_screener
+from src.utilities.manager import *
 from src.model.Screener import Screener
 
+init_db()
 
 def add_default_strategy():
         insert_screener()
         st.rerun()
 
 def display_screener_page():
-
     screeners = get_screener()
     st.title('Screener Page')
     st.write('Your Screeners :')
-    
     
     for screener in screeners:
         with st.expander(screener.name):
@@ -31,7 +30,7 @@ def display_screener_page():
         #Redirect to edit page
         if edit_button:
             st.session_state['current_id'] = screener.id
-            st.switch_page("pages/screening_edit_page.py")
+            st.switch_page("pages/screener_edit_page.py")
         
         #Delete selected strategy
         if delete_button:
