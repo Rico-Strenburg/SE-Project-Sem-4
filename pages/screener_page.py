@@ -1,10 +1,10 @@
 import streamlit as st
-from src.utilities.manager import delete_screener, insert_new_screener, get_screener, update_screener
+from src.utilities.manager import delete_screener, insert_screener, get_screener, update_screener
 from src.model.Screener import Screener
 
 
 def add_default_strategy():
-        insert_new_screener()
+        insert_screener()
         st.rerun()
 
 def display_screener_page():
