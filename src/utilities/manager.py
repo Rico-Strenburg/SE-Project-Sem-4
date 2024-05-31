@@ -11,6 +11,17 @@ def init_db():
                       CREATE TABLE IF NOT EXISTS strategies(
                           strategyId INTEGER PRIMARY KEY,
                           name TEXT,
+                          description TEXT,
+                          screenerId INTEGER,
+                          trading TEXT,
+                          stopLoss TEXT
+                          
+                          )
+                ''')
+            c.execute('''
+                      CREATE TABLE IF NOT EXISTS screener(
+                          screenerId INTEGER PRIMARY KEY,
+                          name TEXT,
                           description TEXT
                           )
                 ''')
@@ -28,11 +39,12 @@ def init_db():
             ''')
             conn.commit()
 
-def update_strategy(name, desc, id):
+def update_strategy(name, desc, id, screenerId, trading, stopLoss):
     return
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
-        c.execute("UPDATE strategies SET name = ?, description = ? WHERE strategyId = ?", (name, desc, id))
+        c.execute("UPDATE strategies SET name = ?, description = ?, screenerId = ?, trading = ?, stopLoss = ? WHERE strategyId = ?", 
+                  (name, desc, id, screenerId, trading, stopLoss))
         conn.commit()
 
 def insert_new_strategy():
@@ -48,6 +60,8 @@ def delete_strategy(strategy_id):
         c.execute(f"DELETE FROM strategies WHERE strategyId = {strategy_id}")
         conn.commit()
 
+
+
 def get_strategies(id=None):
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
@@ -61,23 +75,36 @@ def get_strategies(id=None):
     strategies = []
 
     for row in data:
-        strategy = Strategy(row[0], row[1], row[2])
+        strategy = Strategy(row[0], row[1], row[2], row[3], row[4], row[5])
         strategies.append(strategy)
     
     return strategies
+
+def get_screener_dictionary():
+    with sqlite3.connect('novesieve_dev.db') as conn:
+        c = conn.cursor()
+        c.execute("SELECT screenerId, name from screener")
+        data = c.fetchall()
+    dictionary = {}
+
+    for row in data:
+        dictionary[row[0]] = row[1]
+    return dictionary
+        
+
 
 def update_screener(name, desc, id):
     return
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
-        c.execute("UPDATE strategies SET name = ?, description = ? WHERE strategyId = ?", (name, desc, id))
+        c.execute("UPDATE screener SET name = ?, description = ? WHERE screenerId = ?", (name, desc, id))
         conn.commit()
 
 def insert_screener():
     default_data = ("default_strategy", "This is desc")
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
-        c.execute("INSERT INTO strategies (name, description) VALUES (?, ?)", default_data)
+        c.execute("INSERT INTO screener (name, description) VALUES (?, ?)", default_data)
         conn.commit()
 
 # def insert_new_screener():
@@ -87,29 +114,29 @@ def insert_screener():
 #         c.execute("INSERT INTO strategies (name, description) VALUES (?, ?)", default_data)
 #         conn.commit()
     
-def delete_screener(strategy_id):
+def delete_screener(screener_id):
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
-        c.execute(f"DELETE FROM strategies WHERE strategyId = {strategy_id}")
+        c.execute(f"DELETE FROM screener WHERE screenerId = {screener_id}")
         conn.commit()
 
 def get_screener(id=None):
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
         if id:
-            c.execute(f"Select * from strategies WHERE strategyId = {id}")
+            c.execute(f"Select * from screener WHERE screenerId = {id}")
             data = c.fetchone()
             return data
-        c.execute(f"SELECT * FROM strategies")
+        c.execute(f"SELECT * FROM screener")
         data = c.fetchall()
     
-    strategies = []
+    screeners = []
 
     for row in data:
         strategy = Screener(row[0], row[1], row[2])
-        strategies.append(strategy)
-    
-    return strategies
+        screeners.append(strategy)
+        
+    return screeners
 
 def insert_ratio(strategy_id, type, ratio="<select>",ratio2="<select>", operator="=", value=0, must_match=0):
     data = (strategy_id, ratio, ratio2, type, operator, value, must_match)
