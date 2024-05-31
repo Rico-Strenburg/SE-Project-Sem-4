@@ -3,8 +3,7 @@ from src.utilities.manager import *
 from src.model.Screener import Screener
 
 init_db()
-
-def add_default_strategy():
+def add_default_screener():
         insert_screener()
         st.rerun()
 
@@ -38,10 +37,10 @@ def display_screener_page():
             st.rerun()
             
     if st.button('Add Strategy'):
-        add_default_strategy()
+        add_default_screener()
 
 # if __name__ == '__main__':
-#     display_strategy_page()
+#     display_screener_page()
 
 
 display_screener_page()
