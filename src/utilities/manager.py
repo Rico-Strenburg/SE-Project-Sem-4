@@ -2,6 +2,7 @@ import sqlite3
 from ..model.Strategy import Strategy
 from ..model.Screener import Screener
 from ..model.Ratio import Ratio
+from ..model.Pattern import Pattern
 
 # Execute a SQL command to create a table
 def init_db():
@@ -28,7 +29,7 @@ def init_db():
             c.execute('''
                       CREATE TABLE IF NOT EXISTS ratio_attributes(
                           ratioId INTEGER PRIMARY KEY,
-                          strategyId INTEGER,
+                          screenerId INTEGER,
                           ratio_name TEXT,
                           ratio_name2 TEXT,
                           type TEXT,
@@ -41,8 +42,8 @@ def init_db():
             c.execute('''
                       CREATE TABLE IF NOT EXISTS pattern_rules(
                           patternId INTEGER PRIMARY KEY,
-                          screenerId INTEGER
-                          name TEXT,
+                          screenerId INTEGER,
+                          name TEXT
                     )
             ''')
             conn.commit()
@@ -98,8 +99,7 @@ def get_screener_dictionary():
     for row in data:
         dictionary[row[0]] = row[1]
     return dictionary
-        
-
+    
 
 def update_screener(name, desc, id):
     return
@@ -109,7 +109,7 @@ def update_screener(name, desc, id):
         conn.commit()
 
 def insert_screener():
-    default_data = ("default_strategy", "This is desc")
+    default_data = ("default_screener", "This is desc")
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
         c.execute("INSERT INTO screener (name, description) VALUES (?, ?)", default_data)
@@ -160,39 +160,55 @@ def insert_pattern(pattern_id, screener_id, name):
         conn.commit()
 
 def get_pattern(screener_id):
-    # with sqlite3.connect('novesieve_dev.db') as conn:
-    #     c = conn.cursor()
-    #     if id:
-    #         c.execute(f"SELECT * FROM ratio_attributes WHERE strategyId = {strategy_id} AND category = 'fundamental'")
-    #         data = c.fetchall()
+    with sqlite3.connect('novesieve_dev.db') as conn:
+        c = conn.cursor()
+        if id:
+            c.execute(f"""
+                      SELECT * FROM pattern_rules WHERE screenerId = {screener_id}
+                      """)
+            data = c.fetchall()
     
-    # ratios = []
+    patterns = []
 
-    # for row in data:
-    #     ratio = Ratio(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8])
-    #     ratios.append(ratio)
+    for row in data:
+        pattern = Pattern(row[0], row[1], row[2])
+        patterns.append(pattern)
     
-    # return ratios
+    return patterns
 
-def insert_ratio(strategy_id, type, category, ratio="<select>",ratio2="<select>", operator="=", value=0, must_match=0):
-    data = (strategy_id, ratio, ratio2, type, category, operator, value, must_match)
+def insert_pattern(screener_id, name="Basic Pattern Rule"):
+    data = (screener_id, name)
+    with sqlite3.connect('novesieve_dev.db') as conn:
+        c = conn.cursor()
+        if id:
+            c.execute(f"""
+                      INSERT INTO
+                      pattern_rules
+                      (screenerId, name)
+                      VALUES
+                      (?, ?)
+                      """, data)
+            conn.commit()
+
+def insert_ratio(screener_id, type, category, ratio="<select>",ratio2="<select>", operator="=", value=0, must_match=0):
+    data = (screener_id, ratio, ratio2, type, category, operator, value, must_match)
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
         c.execute("""
                   INSERT INTO 
                   ratio_attributes
-                  (strategyId, ratio_name, ratio_name2, type, category, operator, value, must_match)
+                  (screenerId, ratio_name, ratio_name2, type, category, operator, value, must_match)
                   VALUES
                   (?, ?, ?, ? ,?, ?, ?, ?)
                   """
                   , data)
         conn.commit()
 
-def get_fundamental(strategy_id):
+def get_fundamental(screener_id):
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
         if id:
-            c.execute(f"SELECT * FROM ratio_attributes WHERE strategyId = {strategy_id} AND category = 'fundamental'")
+            c.execute(f"SELECT * FROM ratio_attributes WHERE screenerId = {screener_id} AND category = 'fundamental'")
             data = c.fetchall()
     
     ratios = []
@@ -203,11 +219,11 @@ def get_fundamental(strategy_id):
     
     return ratios
 
-def get_technical(strategy_id):
+def get_technical(screener_id):
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
         if id:
-            c.execute(f"SELECT * FROM ratio_attributes WHERE strategyId = {strategy_id} AND category = 'technical'")
+            c.execute(f"SELECT * FROM ratio_attributes WHERE screenerId = {screener_id} AND category = 'technical'")
             data = c.fetchall()
     
     ratios = []

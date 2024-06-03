@@ -10,6 +10,7 @@ __pycache__/
 # Ignore logs and temporary files
 *.log
 *.tmp
+*.db
 
 #Ignore
 novasieve_dev.db

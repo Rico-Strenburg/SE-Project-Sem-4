@@ -6,6 +6,7 @@ from src.model.Screener import Screener
 from typing import List
 from src.model.Pattern import Pattern
 
+pattern_rule_option = ["Basic Pattern Rule", "Medium Pattern", "Hard Pattern"]
 basic_ratio_options = ['<select>', 'Open Price', 'High Price', 'Low Price', 'Close Price']
 operator_options = ['>', '<', '>=', '<=', '=']
 
@@ -62,6 +63,18 @@ def ratio_vs_ratio_rule(ratio:Ratio):
         save_button = st.button('\u2713', key=f"save_{ratio.ratio_id}")
         if save_button:
             update_ratio(ratio)
+
+def show_pattern_rule(pattern:Pattern):
+    row1, row2, row3 = st.columns([3,3,3])
+    with row1:
+        pattern.name = st.selectbox('',pattern_rule_option,index=pattern_rule_option.index(pattern.name))
+    with row2:
+        st.write('<div style="height: 30px;"></div>', unsafe_allow_html=True)
+        with st.popover("\u22ee"):
+            st.markdown("Additional Settings")
+            ratio.must_match = st.checkbox("Must Match")
+    
+    
 
 # def screening_page():
     
@@ -121,6 +134,19 @@ if screener:
             st.rerun()
         
     st.header("Pattern Rule")
+    for pattern in pattern_rule:
+        show_pattern_rule(pattern)
+        
+    pattern_button = st.button("Add Pattern")
+    if pattern_button:
+        insert_pattern(screener.id)
+        st.rerun()
+    
+    back_button = st.button("Back")
+    
+    if back_button:
+        st.session_state['current_id'] = None
+        st.switch_page("pages/screener_page.py")
 else:
     st.write("Strategy Is Not Found")
     

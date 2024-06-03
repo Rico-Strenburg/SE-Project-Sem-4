@@ -36,7 +36,7 @@ def display_screener_page():
             delete_screener(screener.id)
             st.rerun()
             
-    if st.button('Add Strategy'):
+    if st.button('Add Screener'):
         add_default_screener()
 
 # if __name__ == '__main__':
