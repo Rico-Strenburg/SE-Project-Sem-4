@@ -1,26 +1,24 @@
 import streamlit as st
-from src.utilities.manager import delete_screener, insert_new_screener, get_screener, update_screener
-from src.model.Strategy import Strategy
+from src.utilities.manager import *
+from src.model.Screener import Screener
 
-
-def add_default_strategy():
-        insert_new_screener()
+init_db()
+def add_default_screener():
+        insert_screener()
         st.rerun()
 
 def display_screener_page():
-
     screeners = get_screener()
     st.title('Screener Page')
     st.write('Your Screeners :')
     
-    
-    for strategy in screeners:
-        with st.expander(strategy.name):
-            st.write("Description : " + strategy.desc)
+    for screener in screeners:
+        with st.expander(screener.name):
+            st.write("Description : " + screener.desc)
             # st.write("Stock Universe : " + strategy)
             col1, col2 = st.columns(2)
-            edit_button_id = f"edit_strategy_{strategy.id}"
-            delete_button_id = f"delete_strategy_{strategy.id}"
+            edit_button_id = f"edit_screener_{screener.id}"
+            delete_button_id = f"delete_scrneener_{screener.id}"
 
             # Add buttons to each column
             with col1:
@@ -30,19 +28,19 @@ def display_screener_page():
         
         #Redirect to edit page
         if edit_button:
-            st.session_state['current_id'] = strategy.id
-            st.switch_page("pages/screening_page.py")
+            st.session_state['current_id'] = screener.id
+            st.switch_page("pages/screener_edit_page.py")
         
         #Delete selected strategy
         if delete_button:
-            delete_screener(strategy.id)
+            delete_screener(screener.id)
             st.rerun()
             
-    if st.button('Add Strategy'):
-        add_default_strategy()
+    if st.button('Add Screener'):
+        add_default_screener()
 
 # if __name__ == '__main__':
-#     display_strategy_page()
+#     display_screener_page()
 
 
 display_screener_page()
