@@ -43,7 +43,8 @@ def init_db():
                       CREATE TABLE IF NOT EXISTS pattern_rules(
                           patternId INTEGER PRIMARY KEY,
                           screenerId INTEGER,
-                          name TEXT
+                          name TEXT,
+                          MUST_MATCH INTEGER
                     )
             ''')
             conn.commit()
@@ -151,15 +152,16 @@ def update_screener(name, desc, id):
         c.execute("UPDATE screener SET name = ?, description = ? WHERE screenerId = ?", (name, desc, id))
         conn.commit()
 
-def update_pattern(pattern_id, name):
-    data = (name, pattern_id)
+def update_pattern(pattern_id, name, must_match):
+    data = (name,  must_match, pattern_id)
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
         c.execute("""
                   UPDATE
                   pattern_rules
                   SET
-                  name= ?
+                  name= ?,
+                  must_match = ?
                   WHERE patternId = ?
                   """, data)
         conn.commit()
@@ -176,24 +178,29 @@ def get_pattern(screener_id):
     patterns = []
 
     for row in data:
-        pattern = Pattern(row[0], row[1], row[2])
+        pattern = Pattern(row[0], row[1], row[2], row[3])
         patterns.append(pattern)
     
     return patterns
 
-def insert_pattern(screener_id, name="Basic Pattern Rule"):
-    data = (screener_id, name)
+def insert_pattern(screener_id, must_match, name="Basic Pattern Rule"):
+    data = (screener_id, name, must_match)
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
-        if id:
-            c.execute(f"""
-                      INSERT INTO
-                      pattern_rules
-                      (screenerId, name)
-                      VALUES
-                      (?, ?)
-                      """, data)
-            conn.commit()
+        c.execute(f"""
+                    INSERT INTO
+                    pattern_rules
+                    (screenerId, name, MUST_MATCH)
+                    VALUES
+                    (?, ?, ?)
+                    """, data)
+        conn.commit()
+        
+def delete_pattern(pattern_id):
+    with sqlite3.connect('novesieve_dev.db') as conn:
+        c = conn.cursor()
+        c.execute(f"DELETE FROM pattern_rules WHERE patternId = {pattern_id}")
+        conn.commit()
 
 def insert_ratio(screener_id, type, category, ratio="<select>",ratio2="<select>", operator="=", value=0, must_match=0):
     data = (screener_id, ratio, ratio2, type, category, operator, value, must_match)
@@ -291,7 +298,7 @@ def get_screening_result(id):
         item["type"] = "Technical"
         item["first-id"] = fund.ratio
         item["operator"] = fund.operator
-        if (tech.category == 'versus'):
+        if (fund.category == 'versus'):
             item["second-id"] = fund.ratio2
             item["second-multiplier"] = fund.value
         rules.append(item)

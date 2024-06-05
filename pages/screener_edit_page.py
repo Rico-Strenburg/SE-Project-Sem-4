@@ -69,21 +69,25 @@ def ratio_vs_ratio_rule(ratio:Ratio):
             update_ratio(ratio)
 
 def show_pattern_rule(pattern:Pattern):
-    row1, row2, row3 = st.columns([3,3,1])
+    row1, row2, row3, row4 = st.columns([3,3,1,1])
     with row1:
-        pattern.name = st.selectbox('',pattern_rule_option,index=pattern_rule_option.index(pattern.name))
+        pattern.name = st.selectbox('',pattern_rule_option,index=pattern_rule_option.index(pattern.name), key=f"pattern_name_{pattern.patternId}")
     with row2:
         st.write('<div style="height: 30px;"></div>', unsafe_allow_html=True)
         with st.popover("\u22ee"):
             st.markdown("Additional Settings")
-            ratio.must_match = st.checkbox("Must Match", key="match")
+            pattern.must_match = st.checkbox("Must Match", key=f"pattern_match_{pattern.patternId}")
     with row3:
         st.write('<div style="height: 30px;"></div>', unsafe_allow_html=True)
-        save_button = st.button('\u2713')
+        delete_button = st.button('\u2717', key=f"delete_pattern_){pattern.patternId}")
+        if delete_button:
+            delete_pattern(pattern.patternId)
+            st.rerun()
+    with row4:
+        st.write('<div style="height: 30px;"></div>', unsafe_allow_html=True)
+        save_button = st.button('\u2713', key=f"save_pattern_{pattern.patternId}")
         if save_button:
-            update_pattern(pattern.patternId, pattern.name)
-    
-    
+            update_pattern(pattern.patternId, pattern.name, pattern.must_match)
 
 # def screening_page():
     
@@ -149,11 +153,12 @@ if screener:
         
     st.header("Pattern Rule")
     for pattern in pattern_rule:
+        # st.write(pattern.patternId)
         show_pattern_rule(pattern)
         
     pattern_button = st.button("Add Pattern")
     if pattern_button:
-        insert_pattern(screener.id)
+        insert_pattern(screener.id, 0)
         st.rerun()
     
     back_button = st.button("Back")
