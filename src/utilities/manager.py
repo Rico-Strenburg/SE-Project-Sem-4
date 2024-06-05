@@ -49,7 +49,6 @@ def init_db():
             conn.commit()
 
 def update_strategy(name, desc, id, screenerId, trading, stopLoss):
-    return
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
         c.execute("UPDATE strategies SET name = ?, description = ?, screenerId = ?, trading = ?, stopLoss = ? WHERE strategyId = ?", 
@@ -102,7 +101,6 @@ def get_screener_dictionary():
     
 
 def update_screener(name, desc, id):
-    return
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
         c.execute("UPDATE screener SET name = ?, description = ? WHERE screenerId = ?", (name, desc, id))
@@ -146,16 +144,16 @@ def get_screener(id=None):
         
     return screeners
 
-def insert_pattern(pattern_id, screener_id, name):
-    data = (pattern_id, screener_id, name)
+def update_pattern(pattern_id, name):
+    data = (name, pattern_id)
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
         c.execute("""
-                  INSERT INTO
+                  UPDATE
                   pattern_rules
-                  (patternId, screenerId, name)
-                  VALUES
-                  (?, ?, ?)
+                  SET
+                  name= ?
+                  WHERE patternId = ?
                   """, data)
         conn.commit()
 
@@ -256,6 +254,48 @@ def update_ratio(ratio:Ratio):
                   """, (ratio.ratio, ratio.ratio2, ratio.operator, ratio.value, ratio.must_match, ratio.ratio_id))
         conn.commit()
 
+def get_screening_result(id):
+    rules = []
+    technicals = get_technical(id)
+    funds = get_fundamental(id)
+    patterns = get_pattern(id)
+    
+    for pattern in patterns:
+        pattern:Pattern = pattern
+        item = {}
+        item["type"] = "binary"
+        item["id"] = pattern.name
+        rules.append(item)
+    
+    for technical in technicals:
+        tech:Ratio = technical
+        item = {}
+        item["type"] = "Technical"
+        item["first-id"] = tech.ratio
+        item["operator"] = tech.operator
+        if (tech.category == 'versus'):
+            item["second-id"] = tech.ratio2
+            item["second-multiplier"] = tech.value
+        rules.append(item)
+    
+    for fund in funds:
+        fund:Ratio = fund
+        item = {}
+        item["type"] = "Technical"
+        item["first-id"] = fund.ratio
+        item["operator"] = fund.operator
+        if (tech.category == 'versus'):
+            item["second-id"] = fund.ratio2
+            item["second-multiplier"] = fund.value
+        rules.append(item)
+    
+    print(rules)
+    
+    return
+        
+        
+        
+    
 # # Read Data
 # c.execute("SELECT * FROM users")
 # rows = c.fetchall()
