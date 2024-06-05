@@ -33,14 +33,14 @@ def init_db():
                           ratio_name2 TEXT,
                           type TEXT,
                           operator TEXT,
-                          value INTEGER,
+                          value REAL,
                           MUST_MATCH INTEGER
                     )
             ''')
             conn.commit()
 
 def update_strategy(name, desc, id, screenerId, trading, stopLoss):
-    return
+    # return
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
         c.execute("UPDATE strategies SET name = ?, description = ?, screenerId = ?, trading = ?, stopLoss = ? WHERE strategyId = ?", 
@@ -85,20 +85,12 @@ def get_screener_dictionary():
         c = conn.cursor()
         c.execute("SELECT screenerId, name from screener")
         data = c.fetchall()
-    dictionary = {}
+    dictionary = {} 
 
     for row in data:
         dictionary[row[0]] = row[1]
     return dictionary
         
-
-
-def update_screener(name, desc, id):
-    return
-    with sqlite3.connect('novesieve_dev.db') as conn:
-        c = conn.cursor()
-        c.execute("UPDATE screener SET name = ?, description = ? WHERE screenerId = ?", (name, desc, id))
-        conn.commit()
 
 def insert_screener():
     default_data = ("default_strategy", "This is desc")
@@ -124,7 +116,7 @@ def get_screener(id=None):
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
         if id:
-            c.execute(f"Select * from screener WHERE screenerId = {id}")
+            c.execute(f"SELECT * from screener WHERE screenerId = {id}")
             data = c.fetchone()
             return data
         c.execute(f"SELECT * FROM screener")
@@ -137,6 +129,13 @@ def get_screener(id=None):
         screeners.append(strategy)
         
     return screeners
+
+def update_screener(name, desc, id):
+    # return
+    with sqlite3.connect('novesieve_dev.db') as conn:
+        c = conn.cursor()
+        c.execute("UPDATE screener SET name = ?, description = ? WHERE screenerId = ?", (name, desc, id))
+        conn.commit()
 
 def insert_ratio(strategy_id, type, ratio="<select>",ratio2="<select>", operator="=", value=0, must_match=0):
     data = (strategy_id, ratio, ratio2, type, operator, value, must_match)
