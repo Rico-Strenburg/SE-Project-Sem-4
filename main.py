@@ -34,7 +34,7 @@ def main():
     # Sidebar selection box
     page = st.sidebar.selectbox(
         'Select a page',
-        ('NULL', 'Home', 'Strategy', 'Screener', 'Backtest', 'Screening')
+        ('Home', 'Strategy', 'Screener', 'Backtest', 'Screening')
     )
 
     # Display the selected page
