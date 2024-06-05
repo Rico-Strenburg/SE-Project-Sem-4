@@ -65,7 +65,7 @@ def ratio_vs_ratio_rule(ratio:Ratio):
             update_ratio(ratio)
 
 def show_pattern_rule(pattern:Pattern):
-    row1, row2, row3 = st.columns([3,3,3])
+    row1, row2, row3 = st.columns([3,3,1])
     with row1:
         pattern.name = st.selectbox('',pattern_rule_option,index=pattern_rule_option.index(pattern.name))
     with row2:
@@ -73,6 +73,11 @@ def show_pattern_rule(pattern:Pattern):
         with st.popover("\u22ee"):
             st.markdown("Additional Settings")
             ratio.must_match = st.checkbox("Must Match")
+    with row3:
+        st.write('<div style="height: 30px;"></div>', unsafe_allow_html=True)
+        save_button = st.button('\u2713')
+        if save_button:
+            update_pattern(pattern.patternId, pattern.name)
     
     
 
