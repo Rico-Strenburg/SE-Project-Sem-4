@@ -72,7 +72,7 @@ def show_pattern_rule(pattern:Pattern):
         st.write('<div style="height: 30px;"></div>', unsafe_allow_html=True)
         with st.popover("\u22ee"):
             st.markdown("Additional Settings")
-            ratio.must_match = st.checkbox("Must Match")
+            ratio.must_match = st.checkbox("Must Match", key="match")
     with row3:
         st.write('<div style="height: 30px;"></div>', unsafe_allow_html=True)
         save_button = st.button('\u2713')
