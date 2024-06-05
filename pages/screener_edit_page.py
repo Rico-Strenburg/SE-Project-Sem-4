@@ -17,7 +17,9 @@ def basic_ratio_rule(ratio:Ratio):
     with basic2:
         ratio.operator = st.selectbox('',operator_options, index=operator_options.index(ratio.operator), key=f"operator_{ratio.ratio_id}" )
     with basic3:
-        ratio.value = st.number_input("",value=ratio.value,  key=f"decimal_{ratio.ratio_id}")
+        if ratio.value is None:
+            ratio.value = 0.0
+        ratio.value = st.number_input('',value=float(ratio.value),format="%.2f" ,key=f"decimal_{ratio.ratio_id}")
     with basic4:
         st.write('<div style="height: 30px;"></div>', unsafe_allow_html=True)
         with st.popover("\u22ee"):
@@ -42,7 +44,9 @@ def ratio_vs_ratio_rule(ratio:Ratio):
     with basic8:
         ratio.operator = st.selectbox('',operator_options, index=operator_options.index(ratio.operator), key=f"operator_{ratio.ratio_id}" )
     with basic9:
-        ratio.value= st.number_input('',value=ratio.value,  key=f"decimal_{ratio.ratio_id}")
+        if ratio.value is None:
+            ratio.value = 0.0
+        ratio.value= st.number_input('',value=float(ratio.value),format="%.2f" , key=f"decimal_{ratio.ratio_id}")
     with basic10:
         st.header("x")
     with basic11:
@@ -101,6 +105,11 @@ if screener:
     screener_name = st.text_input("Screener Name: ", screener.name)
     desc = st.text_area("Description: ", screener.desc)
     # stock_universe = st.selectbox("Stock Universe : ", screener.stock_universe(("IHSG", "..")))
+    
+    save_button = st.button("Save")
+    if save_button:
+        update_screener(screener_name, desc, screener.id)
+        st.text("Succesfull")
     
     
     #Display All Fundamental Rule

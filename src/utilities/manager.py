@@ -35,7 +35,7 @@ def init_db():
                           type TEXT,
                           category TEXT,
                           operator TEXT,
-                          value INTEGER,
+                          value REAL,
                           MUST_MATCH INTEGER
                     )
             ''')
@@ -93,7 +93,7 @@ def get_screener_dictionary():
         c = conn.cursor()
         c.execute("SELECT screenerId, name from screener")
         data = c.fetchall()
-    dictionary = {}
+    dictionary = {} 
 
     for row in data:
         dictionary[row[0]] = row[1]
@@ -130,7 +130,7 @@ def get_screener(id=None):
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
         if id:
-            c.execute(f"Select * from screener WHERE screenerId = {id}")
+            c.execute(f"SELECT * from screener WHERE screenerId = {id}")
             data = c.fetchone()
             return data
         c.execute(f"SELECT * FROM screener")
@@ -143,6 +143,13 @@ def get_screener(id=None):
         screeners.append(strategy)
         
     return screeners
+
+def update_screener(name, desc, id):
+    # return
+    with sqlite3.connect('novesieve_dev.db') as conn:
+        c = conn.cursor()
+        c.execute("UPDATE screener SET name = ?, description = ? WHERE screenerId = ?", (name, desc, id))
+        conn.commit()
 
 def update_pattern(pattern_id, name):
     data = (name, pattern_id)
