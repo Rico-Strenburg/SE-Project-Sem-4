@@ -19,21 +19,46 @@ if strategy:
     # st.text("Welcome Strategy Edit Page")
     # st.text(f"Strategy  Name: {strategy.name}")
     # st.text(f"Descripstion: {strategy.desc}")
-    strategy_name = st.text_input("Screener Name: ", strategy.name)
+    strategy_name = st.text_input("Strategy Name: ", strategy.name)
     desc = st.text_area("Description: ", strategy.desc)
 
     # column = st.selectbox("Describe Column", list(dataset.columns), format_func=cols.get)
 
     screener = st.selectbox("Screener: ", dictionary.keys(),format_func=dictionary.get)
 
-    trading_style = st.selectbox("Trading Style: ", trading_style_param, index = trading_style_param.index(strategy.trading), key=f"trading_{strategy.id}")
-    stopLoss = st.selectbox("Stopp Loss: ", stoploss_param, index = stoploss_param.index(strategy.stopLoss), key=f"trading_{strategy.id}")
+    if strategy.trading in trading_style_param:
+        trading_style_index = trading_style_param.index(strategy.trading)
+    else:
+        trading_style_index = 0  # atau pilih nilai default yang sesuai
+
+    trading_style = st.selectbox("Trading Style: ", trading_style_param, index=trading_style_index)
+
+    # Periksa apakah strategy.stopLoss ada dalam stoploss_param
+    if strategy.stopLoss in stoploss_param:
+        stoploss_index = stoploss_param.index(strategy.stopLoss)
+    else:
+        stoploss_index = 0  # atau pilih nilai default yang sesuai
+
+    stopLoss = st.selectbox("Stop Loss: ", stoploss_param, index=stoploss_index)
+
+    # trading_style = st.selectbox("Trading Style: ", trading_style_param, index = trading_style_param.index(strategy.trading), key=f"trading_{strategy.id}")
+    # stopLoss = st.selectbox("Stopp Loss: ", stoploss_param, index = stoploss_param.index(strategy.stopLoss), key=f"stopLoss_{strategy.id}")
 
     
     save = st.button("Save")
-    if save :
-        update_strategy(strategy_name, desc, screener, trading_style, stopLoss)
     reset = st.button("Reset")
+    if save :
+        st.write(strategy_name)
+        st.write(trading_style)
+        st.write(screener)
+       
+        
+        update_strategy(strategy_name, desc, screener, trading_style, stopLoss, strategy.id)
+    elif reset:
+        st.experimental_rerun()
+        
+    
+    
 
 def sidebar_selection():
     no_sidebar_style = """

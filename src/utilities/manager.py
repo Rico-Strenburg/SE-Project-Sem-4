@@ -52,7 +52,7 @@ def update_strategy(name, desc, id, screenerId, trading, stopLoss):
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
         c.execute("UPDATE strategies SET name = ?, description = ?, screenerId = ?, trading = ?, stopLoss = ? WHERE strategyId = ?", 
-                  (name, desc, id, screenerId, trading, stopLoss))
+                  (name, desc, screenerId, trading, stopLoss, id))
         conn.commit()
 
 def insert_new_strategy():
