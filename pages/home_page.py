@@ -15,9 +15,6 @@ def display_home_page():
 
     if submit:
         print(f"{new_name} and {new_desc}")
-        
-if __name__ == '__main__':
-    display_home_page()
 
 # def display_home_page(conn):
 #     st.title('Home Page')
