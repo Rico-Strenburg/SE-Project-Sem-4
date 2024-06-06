@@ -34,14 +34,15 @@ def main():
     # Sidebar selection box
     page = st.sidebar.selectbox(
         'Select a page',
-        ('Home', 'Strategy', 'Screener', 'Backtest', 'Screening')
+        ('Screener', 'Strategy','Backtest', 'Screening')
     )
 
     # Display the selected page
     if page != 'Select a page':
         if page == 'Home':
-            from pages.home_page import display_home_page
-            display_home_page()
+            # from pages.home_page import display_home_page
+            # display_home_page()
+            pass
         elif page == 'Strategy':
             from pages.strategy_page import display_strategy_page
             display_strategy_page()

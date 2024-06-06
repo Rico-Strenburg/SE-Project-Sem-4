@@ -68,3 +68,4 @@ def sidebar_selection():
 if __name__ == '__main__':
     display_screener_page()
     sidebar_selection()
+# display_screener_page()

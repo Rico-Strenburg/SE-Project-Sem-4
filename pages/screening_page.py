@@ -19,23 +19,21 @@ def screening_page():
     #         break
     # selected_screener = screeners[int(selected_index)]
 
-    apply_button = st.button("Screener")
+    apply_button = st.button("Screen")
     st.button("Edit")
     
     if (apply_button):
-        get_screening_result(selected_screener.id)
-        # table_result = selected_screener.id)
-        
-
-    st.text("Result : 1-25 of 250 equities")
-
-    df_screening = {
-        'Symbol': ['BBCA', 'BBRI'],
-        'Close': [1063, 30],
-        'PBV': [5.11, 3.07]
-    }
-
-    data_screening = st.dataframe(df_screening,width = None, height=None, use_container_width=True)
+        rules = get_screening_result(selected_screener.id)
+        st.dataframe(rules, width = None, height=None, use_container_width=True)
+        st.text(f"Result: Screened {len(rules)} symbols")
+  
+    else:
+        df_screening = {
+            'Symbol': ['BBCA', 'BBRI'],
+            'Close': [1063, 30],
+            'PBV': [5.11, 3.07]
+        }
+        st.dataframe(df_screening,width = None, height=None, use_container_width=True)
 
 
 def sidebar_selection():

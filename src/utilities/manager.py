@@ -1,4 +1,6 @@
 import sqlite3
+from backend_api import analysis_options_reverse, novasieve
+from datetime import datetime
 from ..model.Strategy import Strategy
 from ..model.Screener import Screener
 from ..model.Ratio import Ratio
@@ -35,7 +37,7 @@ def init_db():
                           type TEXT,
                           category TEXT,
                           operator TEXT,
-                          value INTEGER,
+                          value REAL,
                           MUST_MATCH INTEGER
                     )
             ''')
@@ -43,7 +45,8 @@ def init_db():
                       CREATE TABLE IF NOT EXISTS pattern_rules(
                           patternId INTEGER PRIMARY KEY,
                           screenerId INTEGER,
-                          name TEXT
+                          name TEXT,
+                          MUST_MATCH INTEGER
                     )
             ''')
             conn.commit()
@@ -52,7 +55,7 @@ def update_strategy(name, desc, id, screenerId, trading, stopLoss):
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
         c.execute("UPDATE strategies SET name = ?, description = ?, screenerId = ?, trading = ?, stopLoss = ? WHERE strategyId = ?", 
-                  (name, desc, id, screenerId, trading, stopLoss))
+                  (name, desc, screenerId, trading, stopLoss, id))
         conn.commit()
 
 def insert_new_strategy():
@@ -93,7 +96,7 @@ def get_screener_dictionary():
         c = conn.cursor()
         c.execute("SELECT screenerId, name from screener")
         data = c.fetchall()
-    dictionary = {}
+    dictionary = {} 
 
     for row in data:
         dictionary[row[0]] = row[1]
@@ -130,7 +133,7 @@ def get_screener(id=None):
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
         if id:
-            c.execute(f"Select * from screener WHERE screenerId = {id}")
+            c.execute(f"SELECT * from screener WHERE screenerId = {id}")
             data = c.fetchone()
             return data
         c.execute(f"SELECT * FROM screener")
@@ -144,15 +147,23 @@ def get_screener(id=None):
         
     return screeners
 
-def update_pattern(pattern_id, name):
-    data = (name, pattern_id)
+def update_screener(name, desc, id):
+    # return
+    with sqlite3.connect('novesieve_dev.db') as conn:
+        c = conn.cursor()
+        c.execute("UPDATE screener SET name = ?, description = ? WHERE screenerId = ?", (name, desc, id))
+        conn.commit()
+
+def update_pattern(pattern_id, name, must_match):
+    data = (name,  must_match, pattern_id)
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
         c.execute("""
                   UPDATE
                   pattern_rules
                   SET
-                  name= ?
+                  name= ?,
+                  must_match = ?
                   WHERE patternId = ?
                   """, data)
         conn.commit()
@@ -169,24 +180,29 @@ def get_pattern(screener_id):
     patterns = []
 
     for row in data:
-        pattern = Pattern(row[0], row[1], row[2])
+        pattern = Pattern(row[0], row[1], row[2], row[3])
         patterns.append(pattern)
     
     return patterns
 
-def insert_pattern(screener_id, name="Basic Pattern Rule"):
-    data = (screener_id, name)
+def insert_pattern(screener_id, must_match, name="Basic Pattern Rule"):
+    data = (screener_id, name, must_match)
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
-        if id:
-            c.execute(f"""
-                      INSERT INTO
-                      pattern_rules
-                      (screenerId, name)
-                      VALUES
-                      (?, ?)
-                      """, data)
-            conn.commit()
+        c.execute(f"""
+                    INSERT INTO
+                    pattern_rules
+                    (screenerId, name, MUST_MATCH)
+                    VALUES
+                    (?, ?, ?)
+                    """, data)
+        conn.commit()
+        
+def delete_pattern(pattern_id):
+    with sqlite3.connect('novesieve_dev.db') as conn:
+        c = conn.cursor()
+        c.execute(f"DELETE FROM pattern_rules WHERE patternId = {pattern_id}")
+        conn.commit()
 
 def insert_ratio(screener_id, type, category, ratio="<select>",ratio2="<select>", operator="=", value=0, must_match=0):
     data = (screener_id, ratio, ratio2, type, category, operator, value, must_match)
@@ -255,43 +271,139 @@ def update_ratio(ratio:Ratio):
         conn.commit()
 
 def get_screening_result(id):
-    rules = []
+    vars, rules = [], []
     technicals = get_technical(id)
     funds = get_fundamental(id)
     patterns = get_pattern(id)
     
+    n_count = 0
     for pattern in patterns:
-        pattern:Pattern = pattern
-        item = {}
-        item["type"] = "binary"
-        item["id"] = pattern.name
-        rules.append(item)
+        pattern: Pattern = pattern
+
+        pattern_cat = novasieve.screener.check_analysis_method_category("technical", pattern.name)
+        if pattern_cat is None:
+            continue
+
+        var_ = {
+            "var_id": f"ta-{n_count}",
+            "type": "technical",
+            "analysis_type": pattern_cat,
+            "name": pattern.name,
+            "params": None
+        }
+        rule_ = {
+            "type": "binary", 
+            "var_id": f"ta-{n_count}",
+            "var_output": None,
+            "optional": not pattern.must_match,
+            "must_not_occur": False,
+        }
+        vars.append(var_)
+        rules.append(rule_)
+        n_count += 1
     
     for technical in technicals:
         tech:Ratio = technical
-        item = {}
-        item["type"] = "Technical"
-        item["first-id"] = tech.ratio
-        item["operator"] = tech.operator
-        if (tech.category == 'versus'):
-            item["second-id"] = tech.ratio2
-            item["second-multiplier"] = tech.value
-        rules.append(item)
+        tech.ratio = analysis_options_reverse["technical"].get(tech.ratio)
+        tech.ratio2 = analysis_options_reverse["technical"].get(tech.ratio2)
+
+        tech1_cat = novasieve.screener.check_analysis_method_category("technical", tech.ratio)
+        tech2_cat = novasieve.screener.check_analysis_method_category("technical", tech.ratio2)
+        if tech1_cat is None:
+            continue
+
+        var1_ = {
+            "var_id": f"ta-{n_count}",
+            "type": "technical",
+            "analysis_type": tech1_cat,
+            "name": tech.ratio,
+            "params": {
+                "price": "Close"
+            }
+        }
+        vars.append(var1_)
+
+        if tech2_cat is not None:
+            var2_ = {
+                "var_id": f"ta-{n_count+1}",
+                "type": "technical",
+                "analysis_type": tech2_cat,
+                "name": tech.ratio2,
+                "params": {
+                    "price": "Close"
+                }
+            }
+            vars.append(var2_)
+
+        rule_ = {
+            "type": "continuous", 
+            "var_id": f"ta-{n_count}",
+            "var_output": None,
+            "operator": tech.operator,
+            "var2_multiplier": tech.value,
+            "var2_id": None if tech2_cat is None else f"ta-{n_count+1}",
+            "var2_output": None,
+            "optional": not tech.must_match,
+        }
+        rules.append(rule_)
+        n_count += 1 + (tech2_cat is not None)
+        
     
     for fund in funds:
-        fund:Ratio = fund
-        item = {}
-        item["type"] = "Technical"
-        item["first-id"] = fund.ratio
-        item["operator"] = fund.operator
-        if (tech.category == 'versus'):
-            item["second-id"] = fund.ratio2
-            item["second-multiplier"] = fund.value
-        rules.append(item)
+        fund: Ratio = fund
+        fund.ratio = analysis_options_reverse["fundamental"].get(fund.ratio)
+        fund.ratio2 = analysis_options_reverse["fundamental"].get(fund.ratio2)
+        
+        
+        fund1_cat = novasieve.screener.check_analysis_method_category("fundamental", fund.ratio)
+        fund2_cat = novasieve.screener.check_analysis_method_category("fundamental", fund.ratio2)
+        if fund1_cat is None:
+            continue
+
+        var1_ = {
+            "var_id": f"fa-{n_count}",
+            "type": "fundamental",
+            "analysis_type": fund1_cat,
+            "name": fund.ratio,
+            "params": {
+                "price": "Close"
+            }
+        }
+        vars.append(var1_)
+
+        if fund2_cat is not None:
+            var2_ = {
+                "var_id": f"fa-{n_count+1}",
+                "type": "fundamental",
+                "analysis_type": fund2_cat,
+                "name": fund.ratio2,
+                "params": {
+                    "price": "Close"
+                }
+            }
+            vars.append(var2_)
+
+        rule_ = {
+            "type": "continuous", 
+            "var_id": f"fa-{n_count}",
+            "var_output": None,
+            "operator": fund.operator,
+            "var2_multiplier": fund.value,
+            "var2_id": None if fund2_cat is None else f"fa-{n_count+1}",
+            "var2_output": None,
+            "optional": not fund.must_match,
+        }
+        rules.append(rule_)
+        n_count += 1 + (fund2_cat is not None)
     
-    print(rules)
+    screen_result = novasieve.screener.screen(
+        symbols=["CLEO.JK", "MEDC.JK", "BREN.JK", "TPIA.JK", "NCKL.JK", "MBMA.JK", "BMRI.JK", "BBRI.JK", "BBCA.JK", "TLKM.JK"], 
+        time_period=datetime.now().strftime("%Y-%m-%d"),
+        variables=vars,
+        rules=rules
+    )
     
-    return
+    return screen_result
         
         
         
