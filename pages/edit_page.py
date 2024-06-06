@@ -48,11 +48,6 @@ if strategy:
     save = st.button("Save")
     reset = st.button("Reset")
     if save :
-        st.write(strategy_name)
-        st.write(trading_style)
-        st.write(screener)
-       
-        
         update_strategy(strategy_name, desc, screener, trading_style, stopLoss, strategy.id)
     elif reset:
         st.experimental_rerun()

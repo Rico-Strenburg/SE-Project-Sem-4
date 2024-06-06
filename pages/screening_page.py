@@ -23,8 +23,14 @@ def screening_page():
     st.button("Edit")
     
     if (apply_button):
-        get_screening_result(selected_screener.id)
-        # table_result = selected_screener.id)
+        rules = get_screening_result(selected_screener.id)
+
+        data = st.dataframe(rules, width = None, height=None, use_container_width=True)
+        # num_rules = len(int(data))
+        # st.text(f"Result: 1-{num_rules} of {num_rules} rules")
+  
+        
+        
         
 
     st.text("Result : 1-25 of 250 equities")

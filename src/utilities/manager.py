@@ -305,7 +305,7 @@ def get_screening_result(id):
     
     print(rules)
     
-    return
+    return rules
         
         
         
