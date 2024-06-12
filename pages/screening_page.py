@@ -14,7 +14,8 @@ def validate(stock, date):
         return True
 
 def screening_page():
-    screeners = get_screener()
+    # screeners = get_screener()
+    screeners = get_screener_with_rule()
     display_names = [f"{screener.name}" for screener in screeners]
     
     st.title("Screening Page")

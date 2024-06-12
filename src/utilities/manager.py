@@ -163,12 +163,38 @@ def get_screener(id=None):
     screeners = []
 
     for row in data:
-        strategy = Screener(row[0], row[1], row[2])
-        screeners.append(strategy)
+        screener = Screener(row[0], row[1], row[2])
+        screeners.append(screener)
         
     return screeners
 
+def get_screener_with_rule(id=None):
+    valid_id = []
+    with sqlite3.connect('novesieve_dev.db') as conn:
+        c = conn.cursor()
+        c.execute(f"SELECT screenerId FROM screener")
+        data = c.fetchall()
+    
+    for screenerId in data:
+        fund = get_fundamental(screenerId[0])
+        technical = get_technical(screenerId[0])
+        pattern = get_pattern(screenerId[0])
+        if len(fund) > 0 and len(technical) > 0 and len(pattern) > 0:
+            valid_id.append(screenerId[0])
+    
+    with sqlite3.connect('novesieve_dev.db') as conn:
+        c = conn.cursor()
+        query = "SELECT * FROM screener WHERE screenerId IN ({})".format(','.join('?' * len(valid_id)))
+        c.execute(query, valid_id)
+        screener_data = c.fetchall()
+        
+    screeners = []
 
+    for row in screener_data:
+        screener = Screener(row[0], row[1], row[2])
+        screeners.append(screener)
+        
+    return screeners
 
 def update_pattern(pattern_id, name, must_match):
     data = (name,  must_match, pattern_id)
