@@ -60,7 +60,7 @@ def init_db():
             ''')
             conn.commit()
 
-def update_strategy(name, desc, id, screenerId, trading, stopLoss):
+def update_strategy(name, desc, screenerId, trading, stopLoss, id):
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
         c.execute("UPDATE strategies SET name = ?, description = ?, screenerId = ?, trading = ?, stopLoss = ? WHERE strategyId = ?", 
@@ -290,26 +290,23 @@ def get_backtest_payload(strategy_id):
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
         if id:
-            c.execute(f"SELECT * FROM strategies WHERE strategyId = {strategy_id}")
-            data = Strategy(c.fetchone())
-    variables, rules = get_screening_payload(data.screenerId)
-    
-    return variables, rules
-    
-        
-def get_backtest_result(strategy_id, symbols, start_time, end_time, trading_style, stoploss):
-    variables, rules = get_backtest_payload(strategy_id=strategy_id)
-    
-    with sqlite3.connect('novesieve_dev.db') as conn:
-        c = conn.cursor()
-        if id:
             c.execute(f"""
-                      SELECT trading, stopLoss FROM strategies WHERE strategyId = {strategy_id}
+                      SELECT trading, stopLoss, screenerId FROM strategies WHERE strategyId = {strategy_id}
                       """)
             data = c.fetchone()
     
+    
     trading_style = data[0]
     stoploss = data[1]
+    screenerId = data[2]
+    variables, rules = get_screening_payload(screenerId)
+    
+    return variables, rules, trading_style, stoploss
+    
+        
+def get_backtest_result(strategy_id, symbols, start_time, end_time):
+    variables, rules, trading_style, stoploss = get_backtest_payload(strategy_id=strategy_id)
+    
     # ["CLEO.JK", "MEDC.JK", "BREN.JK", "TPIA.JK", "NCKL.JK", "MBMA.JK", "BMRI.JK", "BBRI.JK", "BBCA.JK", "TLKM.JK"]
     backtest_result = novasieve.screener.backtest(
         symbols=symbols, 

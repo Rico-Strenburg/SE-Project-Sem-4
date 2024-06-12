@@ -60,6 +60,9 @@ def screening_page():
     #     validate(selected_stocks, date)
     
     apply_button = st.button("Screening")
+    edit_screener_button = st.button("Edit Screener")
+    if(edit_screener_button):
+        st.switch_page("pages/screener_edit_page.py")
 
     if (apply_button):
         if(validate(selected_stocks, date)):
@@ -73,10 +76,6 @@ def screening_page():
             'PBV': [5.11, 3.07]
         }
         st.dataframe(df_screening,width = None, height=None, use_container_width=True)
-    
-    edit_screener_button = st.button("Edit Screener")
-    if(edit_screener_button):
-        st.switch_page("pages/screener_edit_page.py")
 
 
 def sidebar_selection():
