@@ -4,12 +4,11 @@ from src.model.Screener import Screener
 from datetime import datetime, date as dt
 
 def validate(stock, date):
-
     if(len(stock) <= 0):
-        st.warning("Stock Cannot Be Empty")
+        st.warning("Stock Cannot Be Empty", icon="⚠️")
         return False
     if(date is None):
-        st.error("Date Cannot Be Empty")
+        st.error("Date Cannot Be Empty", icon="⚠️")
         return False
 
 def screening_page():

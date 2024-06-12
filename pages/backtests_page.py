@@ -12,16 +12,16 @@ stock_names = ["BBCA.JK", "BMRI.JK", "BTPS.JK", "BREN.JK", "TPIA.JK", "kaushduia
 def display_backtest_page():
     def validate():
         if (strategy == None):
-            st.write("Strategy cannot be empty")
+            st.warning('Strategy cannot be empty', icon="⚠️")
             return False
         if (start_time == None or end_time == None):
-            st.write("Time Period cannot be empty")
+            st.warning('Time Period cannot be empty', icon="⚠️")
             return False
         if (end_time < start_time):
-            st.write("End Time cannot before start time")
+            st.warning('Time Period cannot be empty', icon="⚠️")
             return False
         if (len(selected_stocks) <= 0):
-            st.write("Please select a stock")
+            st.warning('Please select a stock', icon="⚠️")
             return False
         return True
         
@@ -64,6 +64,7 @@ def display_backtest_page():
 
     if backtest:
         if (validate()):
+            result = get_backtest_result()
             st.write("Succesful")
         # st.dataframe()
 
