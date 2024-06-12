@@ -280,7 +280,7 @@ def update_ratio(ratio:Ratio):
                   """, (ratio.ratio, ratio.ratio2, ratio.operator, ratio.value, ratio.must_match, ratio.ratio_id))
         conn.commit()
 
-def get_screening_result(id):
+def get_screening_result(id, date, selected_stocks):
     vars, rules = [], []
     technicals = get_technical(id)
     funds = get_fundamental(id)

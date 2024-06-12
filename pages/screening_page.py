@@ -34,7 +34,7 @@ def screening_page():
     apply_button = st.button("Screening")
 
     if (apply_button):
-        rules = get_screening_result(selected_screener.id)
+        rules = get_screening_result(selected_screener.id, selected_stocks, date_range)
         st.dataframe(rules, width = None, height=None, use_container_width=True)
         st.text(f"Result: Screened {len(rules)} symbols")
   
