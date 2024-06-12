@@ -313,7 +313,7 @@ def get_backtest_result(strategy_id, symbols, start_time, end_time, variables, r
     return backtest
     
 
-def get_screening_payload(id, date, selected_stocks):
+def get_screening_payload(id):
     vars, rules = [], []
     technicals = get_technical(id)
     funds = get_fundamental(id)
@@ -441,17 +441,19 @@ def get_screening_payload(id, date, selected_stocks):
     
     return vars, rules
 
-def get_screening_result(screenerId):
+def get_screening_result(screenerId, selected_stocks, date):
     variables, rules = get_screening_payload(screenerId)
+    print(variables)
+    print(rules)
     
-    screen_result = novasieve.screener.screen(
-        symbols=["CLEO.JK", "MEDC.JK", "BREN.JK", "TPIA.JK", "NCKL.JK", "MBMA.JK", "BMRI.JK", "BBRI.JK", "BBCA.JK", "TLKM.JK"], 
-        time_period=datetime.now().strftime("%Y-%m-%d"),
-        variables=variables,
-        rules=rules
-    )
+    # screen_result = novasieve.screener.screen(
+    #     symbols=["CLEO.JK", "MEDC.JK", "BREN.JK", "TPIA.JK", "NCKL.JK", "MBMA.JK", "BMRI.JK", "BBRI.JK", "BBCA.JK", "TLKM.JK"], 
+    #     time_period=datetime.now().strftime("%Y-%m-%d"),
+    #     variables=variables,
+    #     rules=rules
+    # )
     
-    return screen_result
+    # return screen_result
         
         
         

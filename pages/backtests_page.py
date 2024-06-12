@@ -6,6 +6,8 @@ from datetime import datetime
 dictionary = get_strategy_dictionary()
 default_date = datetime.today()
 
+stock_names = ["BBCA.JK", "BMRI.JK", "BTPS.JK", "BREN.JK", "TPIA.JK", "kaushduiahdui"]
+
 
 def display_backtest_page():
     def validate():
@@ -17,6 +19,9 @@ def display_backtest_page():
             return False
         if (end_time < start_time):
             st.write("End Time cannot before start time")
+            return False
+        if (len(selected_stocks) <= 0):
+            st.write("Please select a stock")
             return False
         return True
         
@@ -32,6 +37,13 @@ def display_backtest_page():
     st.write('Welcome to the backtest page!')
 
     strategy = st.selectbox("Select Strategy: ", dictionary.keys(),format_func=dictionary.get)
+    selected_stocks = st.multiselect("Select stocks (up to 5):", stock_names)
+
+    # Check if the number of selected stocks exceeds 5
+    if len(selected_stocks) > 5:
+        st.warning("You can only select up to 5 stocks.")
+        # Slice the selected_stocks list to contain only the first 5 items
+        selected_stocks = selected_stocks[:5]
     start_time = st.date_input("Start Time period: ", value=default_date)
     end_time = st.date_input("End time period", value=None)
 
