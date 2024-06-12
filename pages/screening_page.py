@@ -10,6 +10,8 @@ def validate(stock, date):
     if(date is None):
         st.error("Date Cannot Be Empty", icon="⚠️")
         return False
+    else:
+        return True
 
 def screening_page():
     screeners = get_screener()

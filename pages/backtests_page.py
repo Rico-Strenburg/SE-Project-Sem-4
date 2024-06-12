@@ -64,7 +64,7 @@ def display_backtest_page():
 
     if backtest:
         if (validate()):
-            result = get_backtest_result()
+            result = get_backtest_result(strategy, selected_stocks, start_time)
             st.write("Succesful")
         # st.dataframe()
 

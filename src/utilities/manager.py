@@ -443,18 +443,16 @@ def get_screening_payload(id):
 
 def get_screening_result(screenerId, selected_stocks, date):
     variables, rules = get_screening_payload(screenerId)
-    print(variables)
-    print(rules)
     
-    # screen_result = novasieve.screener.screen(
-    #     symbols=["CLEO.JK", "MEDC.JK", "BREN.JK", "TPIA.JK", "NCKL.JK", "MBMA.JK", "BMRI.JK", "BBRI.JK", "BBCA.JK", "TLKM.JK"], 
-    #     time_period=datetime.now().strftime("%Y-%m-%d"),
-    #     variables=variables,
-    #     rules=rules
-    # )
-    
-    # return screen_result
-        
+    print("Something")
+    screen_result = novasieve.screener.screen(
+        symbols=selected_stocks, 
+        time_period=str(date)   ,
+        variables=variables,
+        rules=rules
+    )
+    print(screen_result)
+    return screen_result
         
         
     
