@@ -102,6 +102,16 @@ def get_screener_dictionary():
         dictionary[row[0]] = row[1]
     return dictionary
     
+def get_strategy_dictionary():
+    with sqlite3.connect('novesieve_dev.db') as conn:
+        c = conn.cursor()
+        c.execute("SELECT strategyId, name from strategies")
+        data = c.fetchall()
+    dictionary = {}
+
+    for row in data:
+        dictionary[row[0]] = row[1]
+    return dictionary
 
 def update_screener(name, desc, id):
     with sqlite3.connect('novesieve_dev.db') as conn:

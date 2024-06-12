@@ -11,7 +11,7 @@ from backend_api import analysis_options
 base_ratio_options = ['<select>']
 pattern_rule_option = ["Basic Pattern Rule", "Medium Pattern", "Hard Pattern"]
 # basic_ratio_options = ['<select>', 'Open Price', 'High Price', 'Low Price', 'Close Price']
-operator_options = ['>', '<', '>=', '<=', '=']
+operator_options = ['=', '>', '≥', '<', '≤', 'cross-above', 'cross-below']
 
 def basic_ratio_rule(ratio:Ratio, analysis_type: Literal['technical', 'fundamental']):
     basic_ratio_options = analysis_options[analysis_type]

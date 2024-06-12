@@ -6,7 +6,7 @@ def screening_page():
     screeners = get_screener()
     display_names = [f"{screener.name}" for screener in screeners]
     
-    st.header("Screening Page")
+    st.title("Screening Page")
 
     selected_name = st.selectbox("Select a screener:", display_names)
     selected_screener:Screener = [x for x in screeners if x.name == selected_name][0]
