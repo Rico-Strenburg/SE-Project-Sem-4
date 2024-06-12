@@ -313,7 +313,7 @@ def get_backtest_result(strategy_id, symbols, start_time, end_time, variables, r
     return backtest
     
 
-def get_screening_payload(id):
+def get_screening_payload(id, date, selected_stocks):
     vars, rules = [], []
     technicals = get_technical(id)
     funds = get_fundamental(id)

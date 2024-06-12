@@ -41,16 +41,13 @@ def screening_page():
         st.warning("You can only select up to 5 stocks.")
         # Slice the selected_stocks list to contain only the first 5 items
         selected_stocks = selected_stocks[:5]
-    
-    def is_valid_date(input_date):
-        return isinstance(input_date, date)
 
-    date_range = st.date_input("Select a date range", [])
+    date_range = st.date_input("Select a date")
     
     apply_button = st.button("Screening")
 
     if (apply_button):
-        rules = get_screening_result(selected_screener.id)
+        rules = get_screening_result(selected_screener.id, selected_stocks, date_range)
         st.dataframe(rules, width = None, height=None, use_container_width=True)
         st.text(f"Result: Screened {len(rules)} symbols")
   
