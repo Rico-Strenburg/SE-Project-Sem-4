@@ -46,11 +46,13 @@ if strategy:
 
     
     save = st.button("Save")
-    reset = st.button("Reset")
+    back = st.button("Back")
     if save :
         update_strategy(strategy_name, desc, screener, trading_style, stopLoss, strategy.id)
-    elif reset:
-        st.experimental_rerun()
+    elif back:
+        # st.experimental_rerun()
+        # st.session_state['current_id'] = None
+        st.switch_page("pages/strategy_page.py")
         
     
     
