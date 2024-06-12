@@ -179,7 +179,7 @@ def get_screener_with_rule(id=None):
         fund = get_fundamental(screenerId[0])
         technical = get_technical(screenerId[0])
         pattern = get_pattern(screenerId[0])
-        if len(fund) > 0 and len(technical) > 0 and len(pattern) > 0:
+        if (len(fund) + len(technical) + len(pattern)) > 0:
             valid_id.append(screenerId[0])
     
     with sqlite3.connect('novesieve_dev.db') as conn:
@@ -227,7 +227,7 @@ def get_pattern(screener_id):
     
     return patterns
 
-def insert_pattern(screener_id, must_match, name="Basic Pattern Rule"):
+def insert_pattern(screener_id, must_match, name="<select>"):
     data = (screener_id, name, must_match)
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
@@ -311,41 +311,6 @@ def update_ratio(ratio:Ratio):
                   WHERE ratioId = ?
                   """, (ratio.ratio, ratio.ratio2, ratio.operator, ratio.value, ratio.must_match, ratio.ratio_id))
         conn.commit()
-        
-def get_backtest_payload(strategy_id):
-    with sqlite3.connect('novesieve_dev.db') as conn:
-        c = conn.cursor()
-        if id:
-            c.execute(f"""
-                      SELECT trading, stopLoss, screenerId FROM strategies WHERE strategyId = {strategy_id}
-                      """)
-            data = c.fetchone()
-    
-    
-    trading_style = data[0]
-    stoploss = data[1]
-    screenerId = data[2]
-    variables, rules = get_screening_payload(screenerId)
-    
-    return variables, rules, trading_style, stoploss
-    
-        
-def get_backtest_result(strategy_id, symbols, start_time, end_time):
-    variables, rules, trading_style, stoploss = get_backtest_payload(strategy_id=strategy_id)
-    
-    # ["CLEO.JK", "MEDC.JK", "BREN.JK", "TPIA.JK", "NCKL.JK", "MBMA.JK", "BMRI.JK", "BBRI.JK", "BBCA.JK", "TLKM.JK"]
-    backtest_result = novasieve.screener.backtest(
-        symbols=symbols, 
-        start_time_period = str(start_time),
-        end_time_period = str(end_time),
-        variables=variables,
-        rules=rules,
-        trading_style = trading_style,
-        stoploss=stoploss,
-    )
-    
-    return backtest_result
-    
 
 def get_screening_payload(id):
     vars, rules = [], []
@@ -354,8 +319,11 @@ def get_screening_payload(id):
     patterns = get_pattern(id)
     
     n_count = 0
+    
+    technical_actions = novasieve.screener.get_technical_analysis()
     for pattern in patterns:
         pattern: Pattern = pattern
+        pattern.name = analysis_options_reverse["pattern"].get(pattern.name)
 
         pattern_cat = novasieve.screener.check_analysis_method_category("technical", pattern.name)
         if pattern_cat is None:
@@ -366,13 +334,16 @@ def get_screening_payload(id):
             "type": "technical",
             "analysis_type": pattern_cat,
             "name": pattern.name,
-            "params": None
+            "params": {
+                "price": "Close"
+            }
         }
         rule_ = {
-            "type": "binary", 
+            "type": "discrete", 
             "var_id": f"ta-{n_count}",
             "var_output": None,
             "optional": not pattern.must_match,
+            "chosen": [option for option in technical_actions[pattern_cat][pattern.name]["output"]["options"] if 'bull' in option],
             "must_not_occur": False,
         }
         vars.append(var_)
@@ -477,18 +448,46 @@ def get_screening_payload(id):
 
 def get_screening_result(screenerId, selected_stocks, date):
     variables, rules = get_screening_payload(screenerId)
-    
-    print("Something")
     screen_result = novasieve.screener.screen(
         symbols=selected_stocks, 
-        time_period=str(date)   ,
+        time_period=str(date),
         variables=variables,
         rules=rules
     )
-    print(screen_result)
     return screen_result
         
+def get_backtest_payload(strategy_id):
+    with sqlite3.connect('novesieve_dev.db') as conn:
+        c = conn.cursor()
+        if id:
+            c.execute(f"""
+                      SELECT trading, stopLoss, screenerId FROM strategies WHERE strategyId = {strategy_id}
+                      """)
+            data = c.fetchone()
+    
+    
+    trading_style = data[0]
+    stoploss = data[1]
+    screenerId = data[2]
+    variables, rules = get_screening_payload(screenerId)
+    
+    return variables, rules, trading_style, stoploss
+    
         
+def get_backtest_result(strategy_id, symbols, start_time, end_time):
+    variables, rules, trading_style, stoploss = get_backtest_payload(strategy_id=strategy_id)
+    
+    backtest_result = novasieve.backtest.backtest(
+        symbols=symbols, 
+        start_time_period = str(start_time),
+        end_time_period = str(end_time),
+        variables=variables,
+        rules=rules,
+        trading_style = trading_style,
+        stoploss=stoploss,
+    )
+    
+    return backtest_result
     
 # # Read Data
 # c.execute("SELECT * FROM users")

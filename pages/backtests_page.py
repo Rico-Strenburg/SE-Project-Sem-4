@@ -1,13 +1,13 @@
 import streamlit as st
 from src.utilities.manager import *
 from src.model.Strategy import Strategy
+from backend_api import novasieve
 from datetime import datetime
 
 dictionary = get_strategy_dictionary()
 default_date = datetime.today()
 
-stock_names = ["BBCA.JK", "BMRI.JK", "BTPS.JK", "BREN.JK", "TPIA.JK", "kaushduiahdui"]
-
+stock_names = novasieve.stock_list.get_idx_stock_list()
 
 def display_backtest_page():
     def validate():

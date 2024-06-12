@@ -1,6 +1,7 @@
 import streamlit as st
 from src.utilities.manager import *
 from src.model.Screener import Screener
+from backend_api import novasieve
 from datetime import datetime, date as dt
 
 def validate(stock, date):
@@ -44,7 +45,7 @@ def screening_page():
     #         break
     # selected_screener = screeners[int(selected_index)]
 
-    stock_names = ["BBCA.JK", "BMRI.JK", "BTPS.JK", "BREN.JK", "TPIA.JK", "kaushduiahdui"]
+    stock_names = novasieve.stock_list.get_idx_stock_list()
     selected_stocks = st.multiselect("Select stocks (up to 5):", stock_names)
 
     # Check if the number of selected stocks exceeds 5

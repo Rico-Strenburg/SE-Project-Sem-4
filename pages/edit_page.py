@@ -3,8 +3,8 @@ from src.utilities.manager import *
 from src.model.Strategy import Strategy
 from typing import List
 
-trading_style_param = ["Trading Style Name 1", "Trading Style Name 2"]
-stoploss_param = ["Stopp Loss Name 1", "Stopp Loss Name 2"]
+trading_style_param = ["golden_cross"]
+stoploss_param = ["StopLoss 1", "StopLoss 2"]
 
 if 'current_id' not in st.session_state:
     st.session_state['current_id'] = '-1'
