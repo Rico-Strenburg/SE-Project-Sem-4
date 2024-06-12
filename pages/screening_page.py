@@ -4,7 +4,6 @@ from src.model.Screener import Screener
 from datetime import datetime, date as dt
 
 def validate(stock, date):
-
     if(len(stock) <= 0):
         st.warning("Stock Cannot Be Empty")
         return False
@@ -65,7 +64,6 @@ def screening_page():
             rules = get_screening_result(selected_screener.id, selected_stocks, date_range)
             st.dataframe(rules, width = None, height=None, use_container_width=True)
             st.text(f"Result: Screened {len(rules)} symbols")
-  
     else:
         df_screening = {
             'Symbol': ['BBCA', 'BBRI'],
@@ -73,6 +71,10 @@ def screening_page():
             'PBV': [5.11, 3.07]
         }
         st.dataframe(df_screening,width = None, height=None, use_container_width=True)
+    
+    edit_screener_button = st.button("Edit Screener")
+    if(edit_screener_button):
+        st.switch_page("pages/screener_edit_page.py")
 
 
 def sidebar_selection():
