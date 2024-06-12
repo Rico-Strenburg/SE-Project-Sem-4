@@ -8,9 +8,22 @@ def screening_page():
     
     st.title("Screening Page")
 
+    if not display_names:
+        st.error("No screeners available to display.")
+        return
+
     selected_name = st.selectbox("Select a screener:", display_names)
-    selected_screener:Screener = [x for x in screeners if x.name == selected_name][0]
-    selected_index = None
+
+    selected_screeners = [x for x in screeners if x.name == selected_name]
+    if selected_screeners:
+        selected_screener = selected_screeners[0]
+        # Continue with the rest of your logic using selected_screener
+    else:
+        st.error("Selected screener not found.")
+
+    # selected_name = st.selectbox("Select a screener:", display_names)
+    # selected_screener:Screener = [x for x in screeners if x.name == selected_name][0]
+    # selected_index = None
 
     # for i, screener in enumerate(screeners):
     #     if screener.name == selected_name.split()[0] and screener.id == int(selected_name.split()[1][1:-1]):  # Assuming unique_id is an integer
