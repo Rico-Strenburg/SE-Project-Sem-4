@@ -1,6 +1,7 @@
 import streamlit as st
 from src.utilities.manager import *
 from src.model.Screener import Screener
+from datetime import datetime, date
 
 def screening_page():
     screeners = get_screener()
@@ -19,9 +20,22 @@ def screening_page():
     #         break
     # selected_screener = screeners[int(selected_index)]
 
-    apply_button = st.button("Screen")
-    st.button("Edit")
+    stock_names = ["BBCA.JK", "BMRI.JK", "BTPS.JK", "BREN.JK", "TPIA.JK", "kaushduiahdui"]
+    selected_stocks = st.multiselect("Select stocks (up to 5):", stock_names)
+
+    # Check if the number of selected stocks exceeds 5
+    if len(selected_stocks) > 5:
+        st.warning("You can only select up to 5 stocks.")
+        # Slice the selected_stocks list to contain only the first 5 items
+        selected_stocks = selected_stocks[:5]
     
+    def is_valid_date(input_date):
+        return isinstance(input_date, date)
+
+    date_range = st.date_input("Select a date range", [])
+    
+    apply_button = st.button("Screening")
+
     if (apply_button):
         rules = get_screening_result(selected_screener.id)
         st.dataframe(rules, width = None, height=None, use_container_width=True)
