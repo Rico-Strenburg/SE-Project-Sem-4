@@ -310,7 +310,7 @@ def get_backtest_result(strategy_id, symbols, start_time, end_time, variables, r
         stoploss=stoploss,
     )
     
-    return backtest
+    return backtest_result
     
 
 def get_screening_payload(id):
