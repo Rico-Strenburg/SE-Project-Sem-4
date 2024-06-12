@@ -19,9 +19,25 @@ def screening_page():
     #         break
     # selected_screener = screeners[int(selected_index)]
 
-    apply_button = st.button("Screen")
-    st.button("Edit")
+    stock_names = ["BBCA.JK", "BMRI.JK", "BTPS.JK", "BREN.JK", "TPIA.JK", "kaushduiahdui"]
+    selected_stocks = st.multiselect("Select stocks (up to 5):", stock_names)
+
+    # Check if the number of selected stocks exceeds 5
+    if len(selected_stocks) > 5:
+        st.warning("You can only select up to 5 stocks.")
+        # Slice the selected_stocks list to contain only the first 5 items
+        selected_stocks = selected_stocks[:5]
+
+    # Display the selected stocks
+    if selected_stocks:
+        st.write("You selected:", selected_stocks)
+    else:
+        st.write("No stocks selected")
     
+    apply_button = st.button("screening")
+
+    date_time_period = st.date_input("Date Time Period: ")
+
     if (apply_button):
         rules = get_screening_result(selected_screener.id)
         st.dataframe(rules, width = None, height=None, use_container_width=True)
