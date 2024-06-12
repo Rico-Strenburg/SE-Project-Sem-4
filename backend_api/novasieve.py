@@ -30,6 +30,26 @@ class NovaSieve:
                 raise Exception(f"Error got status code {resp.status_code}")
             
             return pd.DataFrame(resp.json()).set_index("Date")
+        
+        def backtest(
+            self, symbols: List[str], start_time: str, end_time: str, variables: List[str], rules: List[dict],
+            trading_style:str, stoploss:str
+            ) -> pd.DataFrame:
+            backtest_payload = {
+                "symbols": symbols,
+                "start_time_period": start_time,
+                "end_time_period": end_time,
+                "variables": variables,
+                "rules": rules,
+                "trading_style": trading_style,
+                "stoploss": stoploss
+            }
+            
+            # resp = requests.post(self.SCREEN_URL, json=backtest_payload)
+            # if resp.status_code != 200:
+            #     raise Exception(f"Error got status code {resp.status_code}")
+            
+            # return pd.DataFrame(resp.json()).set_index("Date")
 
         def get_technical_analysis(self) -> dict:
             resp = requests.get(self.TA_URL)

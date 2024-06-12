@@ -8,7 +8,18 @@ default_date = datetime.today()
 
 
 def display_backtest_page():
-
+    def validate():
+        if (strategy == None):
+            st.write("Strategy cannot be empty")
+            return False
+        if (start_time == None or end_time == None):
+            st.write("Time Period cannot be empty")
+            return False
+        if (end_time < start_time):
+            st.write("End Time cannot before start time")
+            return False
+        return True
+        
     # tunggu ada function get_strategy_result
     # strategy = get_strategies()
     # display_names = [f"{strategies.name}" for strategies in strategy]
@@ -21,8 +32,8 @@ def display_backtest_page():
     st.write('Welcome to the backtest page!')
 
     strategy = st.selectbox("Select Strategy: ", dictionary.keys(),format_func=dictionary.get)
-    start_time = st.date_input("Start Time periode: ", value=default_date)
-    end_time = st.date_input("End time periode", value=None)
+    start_time = st.date_input("Start Time period: ", value=default_date)
+    end_time = st.date_input("End time period", value=None)
 
     # if end_time and end_time < start_time:
     #     st.warning("End Time cannot be before Start Time. Please select a valid End Time.")
@@ -30,15 +41,19 @@ def display_backtest_page():
     # if end_time:
     #     st.write(f"Selected End Time: {end_time}")
 
-
-    backtest = st.button("Backtest")
-    edit_button = st.button("Edit Strategy")
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        backtest = st.button("Backtest")
+    with col2:
+        edit_button = st.button("Edit Strategy")
 
     if edit_button:
         st.switch_page("pages/strategy_page.py")
 
     if backtest:
-        st.dataframe()
+        if (validate()):
+            st.write("Succesful")
+        # st.dataframe()
 
     # st.text("Result : 1-25 of 250 equities")
 

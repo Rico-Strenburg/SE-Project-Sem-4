@@ -279,8 +279,18 @@ def update_ratio(ratio:Ratio):
                   WHERE ratioId = ?
                   """, (ratio.ratio, ratio.ratio2, ratio.operator, ratio.value, ratio.must_match, ratio.ratio_id))
         conn.commit()
+        
+def get_backtest_payload(strategy_id, stocks, start_date, end_date):
+    variables, rules = get_screening_payload(screenerId)
+        
+def get_backtest_result(strategy_id, stocks, start_date, end_date):
+    pass
+    # startegy : [screener : [], x : , y:]
+    # start_date : x
+    # end_date : x
+    
 
-def get_screening_result(id):
+def get_screening_payload(id):
     vars, rules = [], []
     technicals = get_technical(id)
     funds = get_fundamental(id)
@@ -406,10 +416,15 @@ def get_screening_result(id):
         rules.append(rule_)
         n_count += 1 + (fund2_cat is not None)
     
+    return vars, rules
+
+def get_screening_result(screenerId):
+    variables, rules = get_screening_payload(screenerId)
+    
     screen_result = novasieve.screener.screen(
         symbols=["CLEO.JK", "MEDC.JK", "BREN.JK", "TPIA.JK", "NCKL.JK", "MBMA.JK", "BMRI.JK", "BBRI.JK", "BBCA.JK", "TLKM.JK"], 
         time_period=datetime.now().strftime("%Y-%m-%d"),
-        variables=vars,
+        variables=variables,
         rules=rules
     )
     
