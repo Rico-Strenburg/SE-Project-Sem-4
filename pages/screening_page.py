@@ -1,7 +1,16 @@
 import streamlit as st
 from src.utilities.manager import *
 from src.model.Screener import Screener
-from datetime import datetime, date
+from datetime import datetime, date as dt
+
+def validate(stock, date):
+
+    if(len(stock) <= 0):
+        st.warning("Stock Cannot Be Empty")
+        return False
+    if(date is None):
+        st.error("Date Cannot Be Empty")
+        return False
 
 def screening_page():
     screeners = get_screener()
@@ -42,14 +51,20 @@ def screening_page():
         # Slice the selected_stocks list to contain only the first 5 items
         selected_stocks = selected_stocks[:5]
 
-    date_range = st.date_input("Select a date")
+    date = None
+    date = st.date_input("Select a date")
     
+    # validation_button = st.button("Validate")
+    # if(validation_button):
+    #     validate(selected_stocks, date)
+
     apply_button = st.button("Screening")
 
     if (apply_button):
-        rules = get_screening_result(selected_screener.id, selected_stocks, date_range)
-        st.dataframe(rules, width = None, height=None, use_container_width=True)
-        st.text(f"Result: Screened {len(rules)} symbols")
+        if(validate(selected_stocks, date)):
+            rules = get_screening_result(selected_screener.id, selected_stocks, date_range)
+            st.dataframe(rules, width = None, height=None, use_container_width=True)
+            st.text(f"Result: Screened {len(rules)} symbols")
   
     else:
         df_screening = {
