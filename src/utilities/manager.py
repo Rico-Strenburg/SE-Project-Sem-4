@@ -280,14 +280,31 @@ def update_ratio(ratio:Ratio):
                   """, (ratio.ratio, ratio.ratio2, ratio.operator, ratio.value, ratio.must_match, ratio.ratio_id))
         conn.commit()
         
-def get_backtest_payload(strategy_id, stocks, start_date, end_date):
-    variables, rules = get_screening_payload(screenerId)
+def get_backtest_payload(strategy_id):
+    with sqlite3.connect('novesieve_dev.db') as conn:
+        c = conn.cursor()
+        if id:
+            c.execute(f"SELECT * FROM strategies WHERE strategyId = {strategy_id}")
+            data = Strategy(c.fetchone())
+    variables, rules = get_screening_payload(data.screenerId)
+    
+    return variables, rules
+    
         
-def get_backtest_result(strategy_id, stocks, start_date, end_date):
-    pass
-    # startegy : [screener : [], x : , y:]
-    # start_date : x
-    # end_date : x
+def get_backtest_result(strategy_id, symbols, start_time, end_time, variables, rules, trading_style, stoploss):
+    variables, rules = get_backtest_payload(strategy_id=strategy_id)
+    
+    backtest_result = novasieve.screener.backtest(
+        symbols=["CLEO.JK", "MEDC.JK", "BREN.JK", "TPIA.JK", "NCKL.JK", "MBMA.JK", "BMRI.JK", "BBRI.JK", "BBCA.JK", "TLKM.JK"], 
+        start_time_period = start_time,
+        end_time_period = end_time,
+        variables=variables,
+        rules=rules,
+        trading_style = trading_style,
+        stoploss=stoploss,
+    )
+    
+    return backtest
     
 
 def get_screening_payload(id):
