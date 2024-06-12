@@ -11,6 +11,7 @@ def display_screener_page():
     screeners = get_screener()
     st.title('Screener Page')
     st.write('Your Screeners :')
+
     
     for screener in screeners:
         with st.expander(screener.name):
@@ -35,6 +36,7 @@ def display_screener_page():
         if delete_button:
             delete_screener(screener.id)
             st.rerun()
+            
             
     if st.button('Add Screener'):
         add_default_screener()

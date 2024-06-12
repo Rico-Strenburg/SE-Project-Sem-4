@@ -9,18 +9,8 @@ from ..model.Pattern import Pattern
 # Execute a SQL command to create a table
 def init_db():
     with sqlite3.connect('novesieve_dev.db') as conn:
+            conn.execute("PRAGMA foreign_keys = 1")
             c = conn.cursor()
-            c.execute('''
-                      CREATE TABLE IF NOT EXISTS strategies(
-                          strategyId INTEGER PRIMARY KEY,
-                          name TEXT,
-                          description TEXT,
-                          screenerId INTEGER,
-                          trading TEXT,
-                          stopLoss TEXT
-                          
-                          )
-                ''')
             c.execute('''
                       CREATE TABLE IF NOT EXISTS screener(
                           screenerId INTEGER PRIMARY KEY,
@@ -28,6 +18,21 @@ def init_db():
                           description TEXT
                           )
                 ''')
+            
+            c.execute('''
+                      CREATE TABLE IF NOT EXISTS strategies(
+                          strategyId INTEGER PRIMARY KEY,
+                          name TEXT,
+                          description TEXT,
+                          screenerId INTEGER,
+                          trading TEXT,
+                          stopLoss TEXT,
+                          FOREIGN KEY (screenerId) REFERENCES screener(screenerId) ON DELETE CASCADE
+                          
+                          
+                          )
+                ''')
+            
             c.execute('''
                       CREATE TABLE IF NOT EXISTS ratio_attributes(
                           ratioId INTEGER PRIMARY KEY,
@@ -38,16 +43,20 @@ def init_db():
                           category TEXT,
                           operator TEXT,
                           value REAL,
-                          MUST_MATCH INTEGER
-                    )
+                          MUST_MATCH INTEGER,
+                          FOREIGN KEY (screenerId) REFERENCES screener(screenerId) ON DELETE CASCADE
+                          
+                          )
             ''')
             c.execute('''
                       CREATE TABLE IF NOT EXISTS pattern_rules(
                           patternId INTEGER PRIMARY KEY,
                           screenerId INTEGER,
                           name TEXT,
-                          MUST_MATCH INTEGER
-                    )
+                          MUST_MATCH INTEGER,
+                          FOREIGN KEY (screenerId) REFERENCES screener(screenerId) ON DELETE CASCADE
+                          
+                          )
             ''')
             conn.commit()
 
@@ -119,6 +128,7 @@ def update_screener(name, desc, id):
         c.execute("UPDATE screener SET name = ?, description = ? WHERE screenerId = ?", (name, desc, id))
         conn.commit()
 
+
 def insert_screener():
     default_data = ("default_screener", "This is desc")
     with sqlite3.connect('novesieve_dev.db') as conn:
@@ -135,6 +145,7 @@ def insert_screener():
     
 def delete_screener(screener_id):
     with sqlite3.connect('novesieve_dev.db') as conn:
+        conn.execute("PRAGMA foreign_keys = 1")
         c = conn.cursor()
         c.execute(f"DELETE FROM screener WHERE screenerId = {screener_id}")
         conn.commit()
@@ -157,12 +168,7 @@ def get_screener(id=None):
         
     return screeners
 
-def update_screener(name, desc, id):
-    # return
-    with sqlite3.connect('novesieve_dev.db') as conn:
-        c = conn.cursor()
-        c.execute("UPDATE screener SET name = ?, description = ? WHERE screenerId = ?", (name, desc, id))
-        conn.commit()
+
 
 def update_pattern(pattern_id, name, must_match):
     data = (name,  must_match, pattern_id)
