@@ -64,8 +64,9 @@ def display_backtest_page():
 
     if backtest:
         if (validate()):
-            result = get_backtest_result(strategy, selected_stocks, start_time)
-            st.write("Succesful")
+            result = get_backtest_result(strategy, selected_stocks, start_time, end_time, )
+            st.dataframe(result, width = None, height=None, use_container_width=True)
+            st.text(f"Result: Screened {len(result)} symbols")
         # st.dataframe()
 
     # st.text("Result : 1-25 of 250 equities")

@@ -297,13 +297,24 @@ def get_backtest_payload(strategy_id):
     return variables, rules
     
         
-def get_backtest_result(strategy_id, symbols, start_time, end_time, variables, rules, trading_style, stoploss):
+def get_backtest_result(strategy_id, symbols, start_time, end_time, trading_style, stoploss):
     variables, rules = get_backtest_payload(strategy_id=strategy_id)
     
+    with sqlite3.connect('novesieve_dev.db') as conn:
+        c = conn.cursor()
+        if id:
+            c.execute(f"""
+                      SELECT trading, stopLoss FROM strategies WHERE strategyId = {strategy_id}
+                      """)
+            data = c.fetchone()
+    
+    trading_style = data[0]
+    stoploss = data[1]
+    # ["CLEO.JK", "MEDC.JK", "BREN.JK", "TPIA.JK", "NCKL.JK", "MBMA.JK", "BMRI.JK", "BBRI.JK", "BBCA.JK", "TLKM.JK"]
     backtest_result = novasieve.screener.backtest(
-        symbols=["CLEO.JK", "MEDC.JK", "BREN.JK", "TPIA.JK", "NCKL.JK", "MBMA.JK", "BMRI.JK", "BBRI.JK", "BBCA.JK", "TLKM.JK"], 
-        start_time_period = start_time,
-        end_time_period = end_time,
+        symbols=symbols, 
+        start_time_period = str(start_time),
+        end_time_period = str(end_time),
         variables=variables,
         rules=rules,
         trading_style = trading_style,
