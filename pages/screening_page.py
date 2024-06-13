@@ -1,17 +1,42 @@
 import streamlit as st
 from src.utilities.manager import *
 from src.model.Screener import Screener
-from datetime import datetime, date
+from backend_api import novasieve
+from datetime import datetime, date as dt
+
+def validate(stock, date):
+    if(len(stock) <= 0):
+        st.warning("Stock Cannot Be Empty", icon="⚠️")
+        return False
+    if(date is None):
+        st.error("Date Cannot Be Empty", icon="⚠️")
+        return False
+    else:
+        return True
 
 def screening_page():
-    screeners = get_screener()
+    # screeners = get_screener()
+    screeners = get_screener_with_rule()
     display_names = [f"{screener.name}" for screener in screeners]
     
     st.title("Screening Page")
 
+    if not display_names:
+        st.error("No screeners available to display.")
+        return
+
     selected_name = st.selectbox("Select a screener:", display_names)
-    selected_screener:Screener = [x for x in screeners if x.name == selected_name][0]
-    selected_index = None
+
+    selected_screeners = [x for x in screeners if x.name == selected_name]
+    if selected_screeners:
+        selected_screener = selected_screeners[0]
+        # Continue with the rest of your logic using selected_screener
+    else:
+        st.error("Selected screener not found.")
+
+    # selected_name = st.selectbox("Select a screener:", display_names)
+    # selected_screener:Screener = [x for x in screeners if x.name == selected_name][0]
+    # selected_index = None
 
     # for i, screener in enumerate(screeners):
     #     if screener.name == selected_name.split()[0] and screener.id == int(selected_name.split()[1][1:-1]):  # Assuming unique_id is an integer
@@ -20,7 +45,7 @@ def screening_page():
     #         break
     # selected_screener = screeners[int(selected_index)]
 
-    stock_names = ["BBCA.JK", "BMRI.JK", "BTPS.JK", "BREN.JK", "TPIA.JK", "kaushduiahdui"]
+    stock_names = novasieve.stock_list.get_idx_stock_list()
     selected_stocks = st.multiselect("Select stocks (up to 5):", stock_names)
 
     # Check if the number of selected stocks exceeds 5
@@ -28,19 +53,24 @@ def screening_page():
         st.warning("You can only select up to 5 stocks.")
         # Slice the selected_stocks list to contain only the first 5 items
         selected_stocks = selected_stocks[:5]
-    
-    def is_valid_date(input_date):
-        return isinstance(input_date, date)
 
-    date_range = st.date_input("Select a date range", [])
+    date = None
+    date = st.date_input("Select a date")
+    
+    # validation_button = st.button("Validate")
+    # if(validation_button):
+    #     validate(selected_stocks, date)
     
     apply_button = st.button("Screening")
+    edit_screener_button = st.button("Edit Screener")
+    if(edit_screener_button):
+        st.switch_page("pages/screener_edit_page.py")
 
     if (apply_button):
-        rules = get_screening_result(selected_screener.id)
-        st.dataframe(rules, width = None, height=None, use_container_width=True)
-        st.text(f"Result: Screened {len(rules)} symbols")
-  
+        if(validate(selected_stocks, date)):
+            rules = get_screening_result(selected_screener.id, selected_stocks, date)
+            st.dataframe(rules, width = None, height=None, use_container_width=True)
+            st.text(f"Result: Screened {len(rules)} symbols")
     else:
         df_screening = {
             'Symbol': ['BBCA', 'BBRI'],

@@ -1,14 +1,30 @@
 import streamlit as st
 from src.utilities.manager import *
 from src.model.Strategy import Strategy
+from backend_api import novasieve
 from datetime import datetime
 
 dictionary = get_strategy_dictionary()
 default_date = datetime.today()
 
+stock_names = novasieve.stock_list.get_idx_stock_list()
 
 def display_backtest_page():
-
+    def validate():
+        if (strategy == None):
+            st.warning('Strategy cannot be empty', icon="⚠️")
+            return False
+        if (start_time == None or end_time == None):
+            st.warning('Time Period cannot be empty', icon="⚠️")
+            return False
+        if (end_time < start_time):
+            st.warning('Time Period cannot be empty', icon="⚠️")
+            return False
+        if (len(selected_stocks) <= 0):
+            st.warning('Please select a stock', icon="⚠️")
+            return False
+        return True
+        
     # tunggu ada function get_strategy_result
     # strategy = get_strategies()
     # display_names = [f"{strategies.name}" for strategies in strategy]
@@ -21,8 +37,15 @@ def display_backtest_page():
     st.write('Welcome to the backtest page!')
 
     strategy = st.selectbox("Select Strategy: ", dictionary.keys(),format_func=dictionary.get)
-    start_time = st.date_input("Start Time periode: ", value=default_date)
-    end_time = st.date_input("End time periode", value=None)
+    selected_stocks = st.multiselect("Select stocks (up to 5):", stock_names)
+
+    # Check if the number of selected stocks exceeds 5
+    if len(selected_stocks) > 5:
+        st.warning("You can only select up to 5 stocks.")
+        # Slice the selected_stocks list to contain only the first 5 items
+        selected_stocks = selected_stocks[:5]
+    start_time = st.date_input("Start Time period: ", value=default_date)
+    end_time = st.date_input("End time period", value=None)
 
     # if end_time and end_time < start_time:
     #     st.warning("End Time cannot be before Start Time. Please select a valid End Time.")
@@ -30,15 +53,21 @@ def display_backtest_page():
     # if end_time:
     #     st.write(f"Selected End Time: {end_time}")
 
-
-    backtest = st.button("Backtest")
-    edit_button = st.button("Edit Strategy")
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        backtest = st.button("Backtest")
+    with col2:
+        edit_button = st.button("Edit Strategy")
 
     if edit_button:
         st.switch_page("pages/strategy_page.py")
 
     if backtest:
-        st.dataframe()
+        if (validate()):
+            result = get_backtest_result(strategy, selected_stocks, start_time, end_time)
+            st.dataframe(result, width = None, height=None, use_container_width=True)
+            st.text(f"Result: Screened {len(result)} symbols")
+        # st.dataframe()
 
     # st.text("Result : 1-25 of 250 equities")
 

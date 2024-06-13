@@ -9,18 +9,8 @@ from ..model.Pattern import Pattern
 # Execute a SQL command to create a table
 def init_db():
     with sqlite3.connect('novesieve_dev.db') as conn:
+            conn.execute("PRAGMA foreign_keys = 1")
             c = conn.cursor()
-            c.execute('''
-                      CREATE TABLE IF NOT EXISTS strategies(
-                          strategyId INTEGER PRIMARY KEY,
-                          name TEXT,
-                          description TEXT,
-                          screenerId INTEGER,
-                          trading TEXT,
-                          stopLoss TEXT
-                          
-                          )
-                ''')
             c.execute('''
                       CREATE TABLE IF NOT EXISTS screener(
                           screenerId INTEGER PRIMARY KEY,
@@ -28,6 +18,21 @@ def init_db():
                           description TEXT
                           )
                 ''')
+            
+            c.execute('''
+                      CREATE TABLE IF NOT EXISTS strategies(
+                          strategyId INTEGER PRIMARY KEY,
+                          name TEXT,
+                          description TEXT,
+                          screenerId INTEGER,
+                          trading TEXT,
+                          stopLoss TEXT,
+                          FOREIGN KEY (screenerId) REFERENCES screener(screenerId) ON DELETE CASCADE
+                          
+                          
+                          )
+                ''')
+            
             c.execute('''
                       CREATE TABLE IF NOT EXISTS ratio_attributes(
                           ratioId INTEGER PRIMARY KEY,
@@ -38,20 +43,24 @@ def init_db():
                           category TEXT,
                           operator TEXT,
                           value REAL,
-                          MUST_MATCH INTEGER
-                    )
+                          MUST_MATCH INTEGER,
+                          FOREIGN KEY (screenerId) REFERENCES screener(screenerId) ON DELETE CASCADE
+                          
+                          )
             ''')
             c.execute('''
                       CREATE TABLE IF NOT EXISTS pattern_rules(
                           patternId INTEGER PRIMARY KEY,
                           screenerId INTEGER,
                           name TEXT,
-                          MUST_MATCH INTEGER
-                    )
+                          MUST_MATCH INTEGER,
+                          FOREIGN KEY (screenerId) REFERENCES screener(screenerId) ON DELETE CASCADE
+                          
+                          )
             ''')
             conn.commit()
 
-def update_strategy(name, desc, id, screenerId, trading, stopLoss):
+def update_strategy(name, desc, screenerId, trading, stopLoss, id):
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
         c.execute("UPDATE strategies SET name = ?, description = ?, screenerId = ?, trading = ?, stopLoss = ? WHERE strategyId = ?", 
@@ -119,6 +128,7 @@ def update_screener(name, desc, id):
         c.execute("UPDATE screener SET name = ?, description = ? WHERE screenerId = ?", (name, desc, id))
         conn.commit()
 
+
 def insert_screener():
     default_data = ("default_screener", "This is desc")
     with sqlite3.connect('novesieve_dev.db') as conn:
@@ -135,6 +145,7 @@ def insert_screener():
     
 def delete_screener(screener_id):
     with sqlite3.connect('novesieve_dev.db') as conn:
+        conn.execute("PRAGMA foreign_keys = 1")
         c = conn.cursor()
         c.execute(f"DELETE FROM screener WHERE screenerId = {screener_id}")
         conn.commit()
@@ -152,17 +163,38 @@ def get_screener(id=None):
     screeners = []
 
     for row in data:
-        strategy = Screener(row[0], row[1], row[2])
-        screeners.append(strategy)
+        screener = Screener(row[0], row[1], row[2])
+        screeners.append(screener)
         
     return screeners
 
-def update_screener(name, desc, id):
-    # return
+def get_screener_with_rule(id=None):
+    valid_id = []
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
-        c.execute("UPDATE screener SET name = ?, description = ? WHERE screenerId = ?", (name, desc, id))
-        conn.commit()
+        c.execute(f"SELECT screenerId FROM screener")
+        data = c.fetchall()
+    
+    for screenerId in data:
+        fund = get_fundamental(screenerId[0])
+        technical = get_technical(screenerId[0])
+        pattern = get_pattern(screenerId[0])
+        if (len(fund) + len(technical) + len(pattern)) > 0:
+            valid_id.append(screenerId[0])
+    
+    with sqlite3.connect('novesieve_dev.db') as conn:
+        c = conn.cursor()
+        query = "SELECT * FROM screener WHERE screenerId IN ({})".format(','.join('?' * len(valid_id)))
+        c.execute(query, valid_id)
+        screener_data = c.fetchall()
+        
+    screeners = []
+
+    for row in screener_data:
+        screener = Screener(row[0], row[1], row[2])
+        screeners.append(screener)
+        
+    return screeners
 
 def update_pattern(pattern_id, name, must_match):
     data = (name,  must_match, pattern_id)
@@ -195,7 +227,7 @@ def get_pattern(screener_id):
     
     return patterns
 
-def insert_pattern(screener_id, must_match, name="Basic Pattern Rule"):
+def insert_pattern(screener_id, must_match, name="<select>"):
     data = (screener_id, name, must_match)
     with sqlite3.connect('novesieve_dev.db') as conn:
         c = conn.cursor()
@@ -280,15 +312,18 @@ def update_ratio(ratio:Ratio):
                   """, (ratio.ratio, ratio.ratio2, ratio.operator, ratio.value, ratio.must_match, ratio.ratio_id))
         conn.commit()
 
-def get_screening_result(id):
+def get_screening_payload(id):
     vars, rules = [], []
     technicals = get_technical(id)
     funds = get_fundamental(id)
     patterns = get_pattern(id)
     
     n_count = 0
+    
+    technical_actions = novasieve.screener.get_technical_analysis()
     for pattern in patterns:
         pattern: Pattern = pattern
+        pattern.name = analysis_options_reverse["pattern"].get(pattern.name)
 
         pattern_cat = novasieve.screener.check_analysis_method_category("technical", pattern.name)
         if pattern_cat is None:
@@ -299,13 +334,16 @@ def get_screening_result(id):
             "type": "technical",
             "analysis_type": pattern_cat,
             "name": pattern.name,
-            "params": None
+            "params": {
+                "price": "Close"
+            }
         }
         rule_ = {
-            "type": "binary", 
+            "type": "discrete", 
             "var_id": f"ta-{n_count}",
             "var_output": None,
             "optional": not pattern.must_match,
+            "chosen": [option for option in technical_actions[pattern_cat][pattern.name]["output"]["options"] if 'bull' in option],
             "must_not_occur": False,
         }
         vars.append(var_)
@@ -406,17 +444,50 @@ def get_screening_result(id):
         rules.append(rule_)
         n_count += 1 + (fund2_cat is not None)
     
+    return vars, rules
+
+def get_screening_result(screenerId, selected_stocks, date):
+    variables, rules = get_screening_payload(screenerId)
     screen_result = novasieve.screener.screen(
-        symbols=["CLEO.JK", "MEDC.JK", "BREN.JK", "TPIA.JK", "NCKL.JK", "MBMA.JK", "BMRI.JK", "BBRI.JK", "BBCA.JK", "TLKM.JK"], 
-        time_period=datetime.now().strftime("%Y-%m-%d"),
-        variables=vars,
+        symbols=selected_stocks, 
+        time_period=str(date),
+        variables=variables,
         rules=rules
     )
-    
     return screen_result
         
+def get_backtest_payload(strategy_id):
+    with sqlite3.connect('novesieve_dev.db') as conn:
+        c = conn.cursor()
+        if id:
+            c.execute(f"""
+                      SELECT trading, stopLoss, screenerId FROM strategies WHERE strategyId = {strategy_id}
+                      """)
+            data = c.fetchone()
+    
+    
+    trading_style = data[0]
+    stoploss = data[1]
+    screenerId = data[2]
+    variables, rules = get_screening_payload(screenerId)
+    
+    return variables, rules, trading_style, stoploss
+    
         
-        
+def get_backtest_result(strategy_id, symbols, start_time, end_time):
+    variables, rules, trading_style, stoploss = get_backtest_payload(strategy_id=strategy_id)
+    
+    backtest_result = novasieve.backtest.backtest(
+        symbols=symbols, 
+        start_time_period = str(start_time),
+        end_time_period = str(end_time),
+        variables=variables,
+        rules=rules,
+        trading_style = trading_style,
+        stoploss=stoploss,
+    )
+    
+    return backtest_result
     
 # # Read Data
 # c.execute("SELECT * FROM users")

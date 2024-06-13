@@ -9,7 +9,7 @@ from src.model.Pattern import Pattern
 from backend_api import analysis_options
 
 base_ratio_options = ['<select>']
-pattern_rule_option = ["Basic Pattern Rule", "Medium Pattern", "Hard Pattern"]
+# pattern_rule_option = ["Basic Pattern Rule", "Medium Pattern", "Hard Pattern"]
 # basic_ratio_options = ['<select>', 'Open Price', 'High Price', 'Low Price', 'Close Price']
 operator_options = ['=', '>', '≥', '<', '≤', 'cross-above', 'cross-below']
 
@@ -78,9 +78,12 @@ def ratio_vs_ratio_rule(ratio:Ratio, analysis_type: Literal['technical', 'fundam
             update_ratio(ratio)
 
 def show_pattern_rule(pattern:Pattern):
+    pattern_options = analysis_options["pattern"]
+    list_pattern_options = base_ratio_options + list(pattern_options.values())
+    
     row1, row2, row3, row4 = st.columns([3,3,1,1])
     with row1:
-        pattern.name = st.selectbox('',pattern_rule_option,index=pattern_rule_option.index(pattern.name), key=f"pattern_name_{pattern.patternId}")
+        pattern.name = st.selectbox('',list_pattern_options,index=list_pattern_options.index(pattern.name), key=f"pattern_name_{pattern.patternId}")
     with row2:
         st.write('<div style="height: 30px;"></div>', unsafe_allow_html=True)
         with st.popover("\u22ee"):
