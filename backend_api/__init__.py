@@ -1,7 +1,7 @@
 from .novasieve import NovaSieve
 
-# BACKEND_API_URL = "http://localhost:8989"
-BACKEND_API_URL = "http://192.168.1.9:8989"
+BACKEND_API_URL = "http://localhost:8989"
+# BACKEND_API_URL = "http://192.168.1.9:8989"
 
 novasieve = NovaSieve(BACKEND_API_URL)
 
