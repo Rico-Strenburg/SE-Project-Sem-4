@@ -1,2 +1,2 @@
 # SE-Project-Sem-4
-Stock Filter Web Project
+Stock Filter Web Project (Software Engineering)
